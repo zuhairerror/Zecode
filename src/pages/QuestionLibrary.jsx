@@ -4,7 +4,8 @@ import {
   CheckCircle2,
   Sparkles,
   BookOpen,
-  Terminal
+  Terminal,
+  ArrowRight
 } from 'lucide-react';
 import { QUESTIONS_DATA, TOPICS, DIFFICULTIES } from '../data/questionsData';
 
@@ -53,10 +54,10 @@ export default function QuestionLibrary({ onSelectQuestion, setActivePage, solve
   return (
     <div className="py-8 sm:py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col gap-6 sm:gap-8 min-h-screen w-full overflow-x-hidden">
       {/* Header & Stats Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-slate-800">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-white/[0.08]">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <BookOpen className="w-5 h-5 text-cyan-400" />
+            <BookOpen className="w-4 h-4 text-cyan-400" />
             <span className="text-xs font-mono uppercase tracking-wider text-cyan-400 font-bold">
               Curated Curriculum
             </span>
@@ -70,49 +71,49 @@ export default function QuestionLibrary({ onSelectQuestion, setActivePage, solve
         </div>
 
         {/* Stats Pill */}
-        <div className="grid grid-cols-3 sm:flex items-center gap-2 sm:gap-4 bg-slate-900 p-3 sm:p-4 rounded-2xl border border-slate-800 shrink-0 text-center sm:text-left">
+        <div className="grid grid-cols-3 sm:flex items-center gap-2 sm:gap-4 surface-card p-3 sm:p-4 rounded-xl border-white/[0.08] shrink-0 text-center sm:text-left">
           <div className="flex flex-col">
             <span className="text-[11px] font-mono text-slate-400">Curated</span>
             <span className="text-lg sm:text-xl font-bold font-mono text-white">{QUESTIONS_DATA.length}</span>
           </div>
-          <div className="hidden sm:block h-8 w-px bg-slate-800"></div>
+          <div className="hidden sm:block h-7 w-px bg-white/[0.08]"></div>
           <div className="flex flex-col">
             <span className="text-[11px] font-mono text-slate-400">Solved</span>
             <span className="text-lg sm:text-xl font-bold font-mono text-emerald-400">
               {solvedIds.length} / {QUESTIONS_DATA.length}
             </span>
           </div>
-          <div className="hidden sm:block h-8 w-px bg-slate-800"></div>
+          <div className="hidden sm:block h-7 w-px bg-white/[0.08]"></div>
           <div className="flex flex-col">
-            <span className="text-[11px] font-mono text-slate-400">Visual Ready</span>
+            <span className="text-[11px] font-mono text-slate-400">Visualizer Ready</span>
             <span className="text-lg sm:text-xl font-bold font-mono text-cyan-400">{totalVisual}</span>
           </div>
         </div>
       </div>
 
       {/* Search & Filter Controls */}
-      <div className="flex flex-col gap-4 bg-[#0F172A] p-4 sm:p-5 rounded-2xl border border-slate-800 shadow-md w-full min-w-0">
+      <div className="surface-card p-4 sm:p-5 flex flex-col gap-4 border-white/[0.08] w-full min-w-0">
         {/* Search Bar */}
         <div className="relative">
-          <Search className="w-4 h-4 text-slate-400 absolute left-4 top-3.5" />
+          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search problems by name, category, or keyword (e.g. 'Sort Colors', 'two sum', 'binary search')..."
-            className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-11 pr-4 py-2.5 text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-400 font-mono transition-colors"
+            placeholder="Search problems by title, topic, or keyword (e.g. 'Sort Colors', 'Two Sum', 'Binary Search')..."
+            className="w-full bg-black/40 border border-white/[0.08] rounded-xl pl-10 pr-4 py-2 text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-400 font-mono transition-colors"
           />
         </div>
 
         {/* Filter Pills */}
         <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
           {/* Difficulty Buttons */}
-          <div className="flex items-center gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800 overflow-x-auto">
+          <div className="flex items-center gap-1 bg-white/[0.03] p-1 rounded-lg border border-white/[0.06] overflow-x-auto">
             {DIFFICULTIES.map((diff) => (
               <button
                 key={diff}
                 onClick={() => setSelectedDifficulty(diff)}
-                className={`px-2.5 sm:px-3 py-1 text-xs font-mono rounded-lg transition-all whitespace-nowrap ${
+                className={`px-2.5 sm:px-3 py-1 text-xs font-mono rounded-md transition-all whitespace-nowrap ${
                   selectedDifficulty === diff
                     ? 'bg-cyan-500 text-slate-950 font-bold shadow-sm'
                     : 'text-slate-400 hover:text-slate-200'
@@ -124,12 +125,12 @@ export default function QuestionLibrary({ onSelectQuestion, setActivePage, solve
           </div>
 
           {/* Solved Status Filter */}
-          <div className="flex items-center gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800 overflow-x-auto">
+          <div className="flex items-center gap-1 bg-white/[0.03] p-1 rounded-lg border border-white/[0.06] overflow-x-auto">
             {['All', 'Solved', 'Unsolved'].map((st) => (
               <button
                 key={st}
                 onClick={() => setStatusFilter(st)}
-                className={`px-2.5 sm:px-3 py-1 text-xs font-mono rounded-lg transition-all whitespace-nowrap ${
+                className={`px-2.5 sm:px-3 py-1 text-xs font-mono rounded-md transition-all whitespace-nowrap ${
                   statusFilter === st
                     ? 'bg-cyan-500 text-slate-950 font-bold shadow-sm'
                     : 'text-slate-400 hover:text-slate-200'
@@ -141,12 +142,12 @@ export default function QuestionLibrary({ onSelectQuestion, setActivePage, solve
           </div>
 
           {/* Visualizer Status Filter */}
-          <div className="flex items-center gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800 overflow-x-auto">
+          <div className="flex items-center gap-1 bg-white/[0.03] p-1 rounded-lg border border-white/[0.06] overflow-x-auto">
             {['All', 'Visualizer Ready', 'Sandbox Only'].map((vf) => (
               <button
                 key={vf}
                 onClick={() => setVisFilter(vf)}
-                className={`px-2.5 sm:px-3 py-1 text-xs font-mono rounded-lg transition-all whitespace-nowrap ${
+                className={`px-2.5 sm:px-3 py-1 text-xs font-mono rounded-md transition-all whitespace-nowrap ${
                   visFilter === vf
                     ? 'bg-cyan-500 text-slate-950 font-bold shadow-sm'
                     : 'text-slate-400 hover:text-slate-200'
@@ -159,15 +160,15 @@ export default function QuestionLibrary({ onSelectQuestion, setActivePage, solve
         </div>
 
         {/* Topics Filter Row */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 pt-1 scrollbar-thin">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 pt-1 scrollbar-thin">
           {TOPICS.map((topic) => (
             <button
               key={topic}
               onClick={() => setSelectedTopic(topic)}
               className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
                 selectedTopic === topic
-                  ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-400/50 shadow-sm'
-                  : 'bg-slate-900/80 text-slate-400 hover:text-slate-200 border border-slate-800'
+                  ? 'bg-cyan-500/15 text-cyan-300 border border-cyan-400/40 font-semibold shadow-sm'
+                  : 'bg-white/[0.03] text-slate-400 hover:text-slate-200 border border-white/[0.06]'
               }`}
             >
               {topic}
@@ -176,7 +177,7 @@ export default function QuestionLibrary({ onSelectQuestion, setActivePage, solve
         </div>
       </div>
 
-      {/* Question Results Count */}
+      {/* Results Header */}
       <div className="flex items-center justify-between text-xs font-mono text-slate-400 px-1">
         <span>
           Showing <strong className="text-white">{filteredQuestions.length}</strong> of{' '}
@@ -186,11 +187,11 @@ export default function QuestionLibrary({ onSelectQuestion, setActivePage, solve
 
       {/* Questions Grid */}
       {filteredQuestions.length === 0 ? (
-        <div className="p-10 text-center rounded-2xl bg-[#0F172A] border border-slate-800">
+        <div className="surface-card p-10 text-center border-white/[0.08]">
           <BookOpen className="w-10 h-10 text-slate-600 mx-auto mb-3" />
           <h3 className="text-base font-bold text-white mb-1">No matching problems found</h3>
           <p className="text-xs text-slate-400 mb-4">
-            Try adjusting your search terms or resetting difficulty / topic filters.
+            Try adjusting your search terms or clearing difficulty / topic filters.
           </p>
           <button
             onClick={() => {
@@ -217,7 +218,7 @@ export default function QuestionLibrary({ onSelectQuestion, setActivePage, solve
                   onSelectQuestion(q);
                   setActivePage('visualizer');
                 }}
-                className="p-5 sm:p-6 rounded-2xl bg-[#0F172A] border border-slate-800 hover:border-cyan-500/50 hover:scale-[1.01] transition-all cursor-pointer flex flex-col justify-between group shadow-lg min-w-0"
+                className="surface-card p-5 sm:p-6 cursor-pointer flex flex-col justify-between group shadow-lg min-w-0"
               >
                 <div>
                   {/* Top Badges */}
@@ -246,7 +247,7 @@ export default function QuestionLibrary({ onSelectQuestion, setActivePage, solve
                   </div>
 
                   {/* Title */}
-                  <h3 className="text-base sm:text-lg font-bold text-white group-hover:text-cyan-400 transition-colors mb-2 truncate">
+                  <h3 className="text-base font-bold text-white group-hover:text-cyan-300 transition-colors mb-2 truncate font-display">
                     {q.title}
                   </h3>
 
@@ -257,7 +258,7 @@ export default function QuestionLibrary({ onSelectQuestion, setActivePage, solve
                 </div>
 
                 {/* Footer metadata */}
-                <div className="pt-3 border-t border-slate-800 flex items-center justify-between text-xs font-mono">
+                <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between text-xs font-mono">
                   {q.hasVisualizer ? (
                     <div className="flex items-center gap-1.5 text-cyan-300 truncate">
                       <Sparkles className="w-3.5 h-3.5 text-cyan-400 shrink-0" />

@@ -9,7 +9,8 @@ import {
   Cpu,
   SlidersHorizontal,
   Copy,
-  Check
+  Check,
+  AlertCircle
 } from 'lucide-react';
 
 export default function MonacoEditorPanel({
@@ -42,7 +43,7 @@ export default function MonacoEditorPanel({
       base: 'vs-dark',
       inherit: true,
       rules: [
-        { background: '0B1120', token: '' },
+        { background: '080C16', token: '' },
         { token: 'keyword', foreground: '22D3EE', fontStyle: 'bold' },
         { token: 'identifier', foreground: 'F8FAFC' },
         { token: 'string', foreground: 'FCD34D' },
@@ -51,7 +52,7 @@ export default function MonacoEditorPanel({
         { token: 'delimiter', foreground: '94A3B8' }
       ],
       colors: {
-        'editor.background': '#070B14',
+        'editor.background': '#080C16',
         'editor.foreground': '#F8FAFC',
         'editor.lineHighlightBackground': '#0F172A',
         'editorCursor.foreground': '#06B6D4',
@@ -94,35 +95,36 @@ export default function MonacoEditorPanel({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // Language mapper for Monaco
   const getMonacoLang = (lang) => {
     switch (lang.toLowerCase()) {
       case 'c': return 'c';
       case 'cpp': return 'cpp';
       case 'java': return 'java';
       case 'python': return 'python';
-      default: return 'javascript';
+      default: return 'python';
     }
   };
 
+  const languages = [
+    { id: 'python', label: 'Python 3' },
+    { id: 'cpp', label: 'C++ 17' },
+    { id: 'java', label: 'Java 17' },
+    { id: 'c', label: 'C (GCC)' }
+  ];
+
   return (
-    <div className="flex flex-col h-full bg-[#070B14] rounded-xl border border-slate-800 overflow-hidden shadow-2xl">
-      {/* Editor Header Toolbar */}
-      <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 bg-[#0F172A] border-b border-slate-800">
-        {/* Language Tabs */}
-        <div className="flex items-center gap-1 bg-slate-900 p-1 rounded-lg border border-slate-800">
-          {[
-            { id: 'python', label: 'Python 3' },
-            { id: 'cpp', label: 'C++' },
-            { id: 'java', label: 'Java' },
-            { id: 'c', label: 'C' }
-          ].map((item) => (
+    <div className="surface-card flex flex-col h-full overflow-hidden shadow-2xl border-white/[0.08]">
+      {/* Editor Header Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-2.5 bg-[#080C16] border-b border-white/[0.08]">
+        {/* Language Selector Pills */}
+        <div className="flex items-center gap-1 bg-white/[0.03] p-1 rounded-lg border border-white/[0.06] overflow-x-auto">
+          {languages.map((item) => (
             <button
               key={item.id}
               onClick={() => onLanguageChange(item.id)}
-              className={`px-3 py-1 text-xs font-mono font-medium rounded transition-all ${
+              className={`px-2.5 py-1 text-xs font-mono font-medium rounded transition-all whitespace-nowrap ${
                 language === item.id
-                  ? 'bg-cyan-500 text-slate-950 font-bold shadow-md shadow-cyan-500/20'
+                  ? 'bg-cyan-500 text-slate-950 font-bold shadow-sm'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >
@@ -131,7 +133,7 @@ export default function MonacoEditorPanel({
           ))}
         </div>
 
-        {/* Action Buttons */}
+        {/* Action Controls */}
         <div className="flex items-center gap-2">
           {/* Custom Input Toggle */}
           <button
@@ -145,7 +147,7 @@ export default function MonacoEditorPanel({
             <span className="hidden sm:inline">Input</span>
           </button>
 
-          {/* Copy Button */}
+          {/* Copy Code */}
           <button
             onClick={handleCopyCode}
             className="btn-secondary text-xs py-1.5 px-2.5"
@@ -158,49 +160,60 @@ export default function MonacoEditorPanel({
           <button
             onClick={onResetCode}
             className="btn-secondary text-xs py-1.5 px-2.5"
-            title="Reset to Starter Solution"
+            title="Reset Starter Code"
           >
             <RotateCcw className="w-3.5 h-3.5" />
           </button>
 
           {/* Visualize Execution Button */}
-          <button
-            onClick={onVisualize}
-            className="btn-secondary text-xs py-1.5 px-3 border-cyan-500/50 text-cyan-300 hover:bg-cyan-500/20"
-            title="Run Algorithm Animation"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-            <span className="font-bold">Visualize</span>
-          </button>
+          {onVisualize && (
+            <button
+              onClick={onVisualize}
+              className="btn-secondary text-xs py-1.5 px-3 border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/15"
+              title="Visualize Algorithm Trace"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+              <span className="font-semibold hidden sm:inline">Trace</span>
+            </button>
+          )}
 
-          {/* Run Code Button */}
+          {/* Prominent Run Code Button */}
           <button
             onClick={onRunCode}
             disabled={isExecuting}
-            className="btn-primary text-xs py-1.5 px-3"
+            className="btn-primary text-xs py-1.5 px-3.5 font-bold"
           >
-            <Play className="w-3.5 h-3.5 fill-current" />
-            <span>{isExecuting ? 'Running...' : 'Run Code'}</span>
+            {isExecuting ? (
+              <>
+                <span className="w-3 h-3 border-2 border-slate-950 border-t-transparent rounded-full animate-spin"></span>
+                <span>Running...</span>
+              </>
+            ) : (
+              <>
+                <Play className="w-3.5 h-3.5 fill-current" />
+                <span>Run Code</span>
+              </>
+            )}
           </button>
         </div>
       </div>
 
-      {/* Custom Input Drawer (Optional Expandable) */}
+      {/* Expandable Custom Input Drawer */}
       {showInputDrawer && (
-        <div className="p-3 bg-slate-900 border-b border-slate-800 flex flex-col gap-1.5 text-xs font-mono">
-          <label className="text-slate-400">Custom Standard Input / Parameters:</label>
+        <div className="p-3 bg-[#0A0F1D] border-b border-white/[0.08] flex flex-col gap-1.5 text-xs font-mono">
+          <label className="text-slate-400">Custom Standard Input / Program Arguments:</label>
           <input
             type="text"
             value={customInput}
             onChange={(e) => onCustomInputChange(e.target.value)}
-            placeholder="e.g. [2, 7, 11, 15] or target=9"
-            className="bg-slate-950 border border-slate-700 rounded px-3 py-1.5 text-slate-200 focus:outline-none focus:border-cyan-400"
+            placeholder="e.g. [2, 0, 2, 1, 1, 0]"
+            className="bg-black/50 border border-white/[0.08] rounded-lg px-3 py-1.5 text-slate-200 focus:outline-none focus:border-cyan-400"
           />
         </div>
       )}
 
       {/* Monaco Code Editor */}
-      <div className="flex-1 min-h-[360px] relative">
+      <div className="flex-1 min-h-[350px] relative bg-[#080C16]">
         <Editor
           height="100%"
           language={getMonacoLang(language)}
@@ -224,12 +237,12 @@ export default function MonacoEditorPanel({
       </div>
 
       {/* Execution Console / Output Tray */}
-      <div className="border-t border-slate-800 bg-[#0F172A] flex flex-col max-h-[180px]">
+      <div className="border-t border-white/[0.08] bg-[#0A0F1D] flex flex-col max-h-[170px]">
         {/* Console Header */}
-        <div className="flex items-center justify-between px-4 py-2 border-b border-slate-800 text-xs font-mono text-slate-400">
+        <div className="flex items-center justify-between px-4 py-2 border-b border-white/[0.06] text-xs font-mono text-slate-400">
           <div className="flex items-center gap-2">
             <Terminal className="w-3.5 h-3.5 text-cyan-400" />
-            <span className="font-bold uppercase tracking-wider">Terminal Output</span>
+            <span className="font-semibold uppercase tracking-wider text-[11px]">Execution Output</span>
             {executionResult && (
               <span
                 className={`px-2 py-0.5 rounded text-[10px] font-bold ${
@@ -260,11 +273,11 @@ export default function MonacoEditorPanel({
         </div>
 
         {/* Console Content */}
-        <div className="p-3 font-mono text-xs overflow-y-auto max-h-[140px] bg-[#070B14]">
+        <div className="p-3 font-mono text-xs overflow-y-auto max-h-[130px] bg-black/40">
           {isExecuting ? (
             <div className="flex items-center gap-2 text-cyan-400">
-              <span className="animate-spin text-base">⟳</span>
-              <span>Compiling and running code in secure sandbox...</span>
+              <span className="animate-spin text-sm">⟳</span>
+              <span>Running code in sandbox...</span>
             </div>
           ) : executionResult ? (
             executionResult.error ? (
@@ -277,8 +290,8 @@ export default function MonacoEditorPanel({
               </pre>
             )
           ) : (
-            <span className="text-slate-600">
-              Run or visualize your code to view sandbox execution output and traces.
+            <span className="text-slate-500">
+              Click &quot;Run Code&quot; to execute your program in the sandboxed runner.
             </span>
           )}
         </div>

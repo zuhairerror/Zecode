@@ -6,13 +6,15 @@ import {
   Play,
   Pause,
   BookOpen,
+  Cpu,
   Layers,
   Bug,
   Terminal,
   Zap,
   RotateCcw,
-  Sliders,
-  CheckCircle2
+  CheckCircle2,
+  Clock,
+  Compass
 } from 'lucide-react';
 import { QUESTIONS_DATA } from '../data/questionsData';
 
@@ -21,35 +23,27 @@ export default function Home({ setActivePage, onSelectQuestion }) {
   const showcaseQuestion =
     QUESTIONS_DATA.find((q) => q.id === 'sort-colors') || QUESTIONS_DATA[0];
 
-  // Live Dutch National Flag algorithm preview on Hero
-  // Initial array: [2, 0, 2, 1, 1, 0]
-  const heroDemoSteps = [
+  // Authentic Dutch National Flag algorithm preview
+  const demoSteps = [
     {
       arr: [2, 0, 2, 1, 1, 0],
       low: 0,
       mid: 0,
       high: 5,
-      active: [0],
-      action: 'nums[mid=0] is 2 -> Swap with nums[high=5], high--',
-      line: 10
+      active: [0, 5],
+      action: 'nums[mid=0] is 2: Swap with nums[high=5]',
+      code: 'nums[mid], nums[high] = nums[high], nums[mid]',
+      line: 11
     },
     {
       arr: [0, 0, 2, 1, 1, 2],
       low: 0,
       mid: 0,
       high: 4,
-      active: [0, 5],
-      action: 'Swapped 2 to high=5. Now inspect nums[mid=0] = 0',
-      line: 11
-    },
-    {
-      arr: [0, 0, 2, 1, 1, 2],
-      low: 1,
-      mid: 1,
-      high: 4,
       active: [0],
-      action: 'nums[mid=0] is 0 -> In 0s zone! low++, mid++',
-      line: 5
+      action: 'nums[mid=0] is 0: In place. low++, mid++',
+      code: 'nums[low], nums[mid] = nums[mid], nums[low]',
+      line: 6
     },
     {
       arr: [0, 0, 2, 1, 1, 2],
@@ -57,44 +51,39 @@ export default function Home({ setActivePage, onSelectQuestion }) {
       mid: 1,
       high: 4,
       active: [1],
-      action: 'nums[mid=1] is 0 -> Swap with low=1, low++, mid++',
-      line: 6
+      action: 'nums[mid=1] is 0: In place. low++, mid++',
+      code: 'low += 1; mid += 1',
+      line: 7
     },
     {
       arr: [0, 0, 2, 1, 1, 2],
       low: 2,
       mid: 2,
       high: 4,
-      active: [2],
-      action: 'nums[mid=2] is 2 -> Swap with nums[high=4], high--',
-      line: 10
+      active: [2, 4],
+      action: 'nums[mid=2] is 2: Swap with nums[high=4]',
+      code: 'nums[mid], nums[high] = nums[high], nums[mid]',
+      line: 11
     },
     {
       arr: [0, 0, 1, 1, 2, 2],
       low: 2,
       mid: 2,
       high: 3,
-      active: [2, 4],
-      action: 'Swapped 2 to high=4. Now inspect nums[mid=2] = 1',
-      line: 11
+      active: [2],
+      action: 'nums[mid=2] is 1: Mid section, advance mid++',
+      code: 'mid += 1',
+      line: 9
     },
     {
       arr: [0, 0, 1, 1, 2, 2],
       low: 2,
       mid: 3,
       high: 3,
-      active: [2],
-      action: 'nums[mid=2] is 1 -> In 1s zone! Advance mid to 3',
-      line: 8
-    },
-    {
-      arr: [0, 0, 1, 1, 2, 2],
-      low: 2,
-      mid: 4,
-      high: 3,
       active: [3],
-      action: 'nums[mid=3] is 1 -> Advance mid to 4. mid > high -> Done!',
-      line: 8
+      action: 'nums[mid=3] is 1: Advance mid. mid > high',
+      code: 'while mid <= high:',
+      line: 3
     },
     {
       arr: [0, 0, 1, 1, 2, 2],
@@ -102,68 +91,70 @@ export default function Home({ setActivePage, onSelectQuestion }) {
       mid: 4,
       high: 3,
       active: [0, 1, 2, 3, 4, 5],
-      action: 'Sorted! [0, 0, 1, 1, 2, 2] in linear O(N) single pass.',
-      line: 14
+      action: 'Partition complete! [0, 0, 1, 1, 2, 2] sorted',
+      code: 'return nums',
+      line: 13
     }
   ];
 
-  const [heroStep, setHeroStep] = useState(0);
-  const [heroIsPlaying, setHeroIsPlaying] = useState(true);
+  const [stepIndex, setStepIndex] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(true);
 
   useEffect(() => {
     let timer;
-    if (heroIsPlaying) {
+    if (isPlaying) {
       timer = setInterval(() => {
-        setHeroStep((prev) => (prev + 1) % heroDemoSteps.length);
+        setStepIndex((prev) => (prev + 1) % demoSteps.length);
       }, 1400);
     }
     return () => clearInterval(timer);
-  }, [heroIsPlaying]);
+  }, [isPlaying]);
 
-  const handleHeroReset = () => {
-    setHeroIsPlaying(false);
-    setHeroStep(0);
-  };
-
-  const currentHeroStep = heroDemoSteps[heroStep];
+  const currentStep = demoSteps[stepIndex];
   const popularQuestions = QUESTIONS_DATA.slice(0, 6);
 
   return (
     <div className="flex flex-col min-h-screen w-full overflow-x-hidden">
       {/* Hero Section */}
-      <section className="relative pt-12 sm:pt-16 lg:pt-20 pb-16 sm:pb-20 px-4 sm:px-6 lg:px-8 bg-radial-glow">
-        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-10 lg:gap-14">
-          {/* Hero Left Content */}
+      <section className="relative pt-12 sm:pt-16 lg:pt-20 pb-16 sm:pb-24 px-4 sm:px-6 lg:px-8 border-b border-white/[0.06]">
+        {/* Subtle Background Radial Glow */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-cyan-500/10 blur-[120px] rounded-full"></div>
+        </div>
+
+        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-16 relative z-10">
+          {/* Left Column: Hero Copy */}
           <div className="flex-1 text-center lg:text-left w-full min-w-0">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-mono font-medium mb-5 sm:mb-6">
-              <Sparkles className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-              <span>Next-Gen Interactive Algorithm Platform</span>
+            {/* Small Badge */}
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/25 text-cyan-300 text-xs font-mono font-medium mb-6">
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+              <span>INTERACTIVE CODE LEARNING</span>
             </div>
 
-            {/* Required Headings */}
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold font-display tracking-tight text-white leading-[1.15]">
-              Understand Code Visually.{' '}
-              <span className="block mt-1 sm:mt-2 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-teal-300 to-amber-300">
-                Master DSA, Step by Step.
+            {/* Main Heading */}
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold font-display tracking-tight text-white leading-[1.12]">
+              Stop Guessing.{' '}
+              <span className="block mt-1 sm:mt-1.5 text-gradient-cyan">
+                Start Visualizing.
               </span>
             </h1>
 
-            {/* Required Description */}
-            <p className="mt-4 text-base sm:text-lg text-slate-300 max-w-2xl leading-relaxed mx-auto lg:mx-0">
-              Turn complex algorithms into interactive animations, execution traces, and clear explanations in C, C++, Python, and Java.
+            {/* Description */}
+            <p className="mt-5 text-sm sm:text-base lg:text-lg text-slate-300 max-w-xl leading-relaxed mx-auto lg:mx-0">
+              Turn complex algorithms into clear, interactive animations. Understand every comparison, swap, pointer movement, and execution step.
             </p>
 
-            {/* Required CTAs */}
-            <div className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center justify-center lg:justify-start gap-3 sm:gap-4 w-full sm:w-auto">
+            {/* CTAs */}
+            <div className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center justify-center lg:justify-start gap-3.5 w-full sm:w-auto">
               <button
                 onClick={() => {
                   onSelectQuestion(showcaseQuestion);
                   setActivePage('visualizer');
                 }}
-                className="btn-primary text-sm py-3 px-6 justify-center shadow-lg shadow-cyan-500/25 group"
+                className="btn-primary text-sm py-3 px-6 justify-center"
               >
                 <span>Start Visualizing</span>
-                <ArrowRight className="w-4 h-4 shrink-0 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-4 h-4 shrink-0" />
               </button>
 
               <button
@@ -171,74 +162,83 @@ export default function Home({ setActivePage, onSelectQuestion }) {
                 className="btn-secondary text-sm py-3 px-6 justify-center"
               >
                 <BookOpen className="w-4 h-4 text-cyan-400 shrink-0" />
-                <span>Explore DSA Questions</span>
+                <span>Explore DSA Library</span>
               </button>
             </div>
 
-            {/* Language & Showcase Badges */}
-            <div className="mt-8 sm:mt-10 flex flex-wrap items-center justify-center lg:justify-start gap-2 sm:gap-3 text-xs text-slate-400 font-mono">
-              <span className="text-slate-500 uppercase tracking-wider font-semibold mr-1">Languages:</span>
-              <span className="px-2.5 py-1 rounded-md bg-slate-900 border border-slate-800 text-slate-200">
-                Python
+            {/* Small Language Labels */}
+            <div className="mt-8 flex flex-wrap items-center justify-center lg:justify-start gap-2 text-xs font-mono text-slate-400">
+              <span className="text-slate-500 text-[11px] uppercase tracking-wider font-semibold mr-1">
+                Languages:
               </span>
-              <span className="px-2.5 py-1 rounded-md bg-slate-900 border border-slate-800 text-slate-200">
-                C++
-              </span>
-              <span className="px-2.5 py-1 rounded-md bg-slate-900 border border-slate-800 text-slate-200">
-                Java
-              </span>
-              <span className="px-2.5 py-1 rounded-md bg-slate-900 border border-slate-800 text-slate-200">
-                C
-              </span>
-              <span className="hidden sm:inline-block px-2.5 py-1 rounded-md bg-amber-500/10 border border-amber-500/30 text-amber-300">
-                ★ Dutch National Flag Showcase
-              </span>
+              {['C++', 'Python', 'Java', 'C'].map((lang) => (
+                <span
+                  key={lang}
+                  className="px-2.5 py-0.5 rounded-md bg-white/[0.04] border border-white/[0.08] text-slate-300 text-[11px]"
+                >
+                  {lang}
+                </span>
+              ))}
             </div>
           </div>
 
-          {/* Hero Right: Live Animated Algorithm Preview (Dutch National Flag / Sort Colors) */}
+          {/* Right Column: Code Workspace Preview */}
           <div className="flex-1 w-full max-w-lg mx-auto lg:mx-0 min-w-0">
-            <div className="p-4 sm:p-6 rounded-2xl bg-[#0F172A]/90 border border-slate-800 shadow-2xl relative glow-cyan w-full min-w-0">
-              {/* Window Header */}
-              <div className="flex items-center justify-between pb-3 sm:pb-4 border-b border-slate-800 mb-4">
+            <div className="surface-card p-4 sm:p-5 shadow-2xl relative w-full border-white/[0.1]">
+              {/* Window Titlebar */}
+              <div className="flex items-center justify-between pb-3.5 border-b border-white/[0.08] mb-4">
                 <div className="flex items-center gap-2">
-                  <div className="w-2.5 h-2.5 rounded-full bg-rose-500/80"></div>
-                  <div className="w-2.5 h-2.5 rounded-full bg-amber-500/80"></div>
-                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/80"></div>
-                  <span className="text-xs font-mono text-cyan-300 ml-1.5 font-bold truncate">
-                    dutch_national_flag.py
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-2.5 h-2.5 rounded-full bg-rose-500/70"></div>
+                    <div className="w-2.5 h-2.5 rounded-full bg-amber-500/70"></div>
+                    <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/70"></div>
+                  </div>
+                  <span className="text-[11px] font-mono text-slate-400 ml-1.5 font-medium truncate">
+                    dutch_flag.py — Sort Colors
                   </span>
                 </div>
-                <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+
+                <div className="flex items-center gap-1.5">
                   <button
-                    onClick={() => setHeroIsPlaying(!heroIsPlaying)}
+                    onClick={() => setIsPlaying(!isPlaying)}
                     className="p-1.5 rounded-lg bg-cyan-500 text-slate-950 font-bold hover:bg-cyan-400 transition-colors"
-                    title={heroIsPlaying ? 'Pause Preview' : 'Play Preview'}
+                    title={isPlaying ? 'Pause' : 'Play'}
                   >
-                    {heroIsPlaying ? <Pause className="w-3.5 h-3.5 fill-current" /> : <Play className="w-3.5 h-3.5 fill-current" />}
+                    {isPlaying ? <Pause className="w-3 h-3 fill-current" /> : <Play className="w-3 h-3 fill-current" />}
                   </button>
                   <button
-                    onClick={handleHeroReset}
-                    className="p-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white transition-colors"
-                    title="Reset Preview"
+                    onClick={() => {
+                      setIsPlaying(false);
+                      setStepIndex(0);
+                    }}
+                    className="p-1.5 rounded-lg bg-white/[0.06] text-slate-300 hover:text-white transition-colors"
+                    title="Reset"
                   >
-                    <RotateCcw className="w-3.5 h-3.5" />
+                    <RotateCcw className="w-3 h-3" />
                   </button>
                 </div>
               </div>
 
-              {/* Three Pointer Indicators (low, mid, high) */}
-              <div className="flex items-end justify-center gap-2.5 sm:gap-3.5 mb-2 min-h-[38px]">
-                {currentHeroStep.arr.map((_, idx) => {
+              {/* Code Line Peek */}
+              <div className="mb-3.5 p-2 rounded-lg bg-black/40 border border-white/[0.06] flex items-center justify-between text-[11px] font-mono">
+                <span className="text-slate-400 truncate">
+                  <strong className="text-cyan-400">L{currentStep.line}:</strong> {currentStep.code}
+                </span>
+                <span className="text-emerald-400 text-[10px] font-bold shrink-0 ml-2">RUNNING</span>
+              </div>
+
+              {/* Pointer Track (low, mid, high) */}
+              <div className="flex items-end justify-center gap-2 sm:gap-3 mb-1 min-h-[34px]">
+                {currentStep.arr.map((_, idx) => {
                   const ptrs = [];
-                  if (idx === currentHeroStep.low) ptrs.push({ name: 'low', color: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' });
-                  if (idx === currentHeroStep.mid) ptrs.push({ name: 'mid', color: 'bg-cyan-500/20 text-cyan-300 border-cyan-400/40' });
-                  if (idx === currentHeroStep.high) ptrs.push({ name: 'high', color: 'bg-rose-500/20 text-rose-300 border-rose-400/40' });
+                  if (idx === currentStep.low) ptrs.push({ name: 'low', color: 'bg-emerald-500/20 text-emerald-300 border-emerald-400/40' });
+                  if (idx === currentStep.mid) ptrs.push({ name: 'mid', color: 'bg-cyan-500/20 text-cyan-300 border-cyan-400/40' });
+                  if (idx === currentStep.high) ptrs.push({ name: 'high', color: 'bg-rose-500/20 text-rose-300 border-rose-400/40' });
 
                   return (
-                    <div key={`ptr-${idx}`} className="w-9 sm:w-12 flex flex-col items-center justify-end">
+                    <div key={`ptr-${idx}`} className="w-9 sm:w-11 flex flex-col items-center justify-end">
                       {ptrs.length > 0 && (
-                        <div className="flex flex-col items-center animate-pointer">
+                        <div className="flex flex-col items-center">
                           <div className="flex flex-wrap justify-center gap-0.5">
                             {ptrs.map((p) => (
                               <span
@@ -249,7 +249,7 @@ export default function Home({ setActivePage, onSelectQuestion }) {
                               </span>
                             ))}
                           </div>
-                          <span className="text-cyan-400 text-[10px] font-bold">▼</span>
+                          <span className="text-cyan-400 text-[9px] font-bold leading-none mt-0.5">▼</span>
                         </div>
                       )}
                     </div>
@@ -257,117 +257,114 @@ export default function Home({ setActivePage, onSelectQuestion }) {
                 })}
               </div>
 
-              {/* Animated Elements: 0 = Red, 1 = White, 2 = Blue */}
-              <div className="flex items-end justify-center gap-2.5 sm:gap-3.5 h-32 px-1 sm:px-2 pb-2">
-                {currentHeroStep.arr.map((val, idx) => {
-                  const isActive = currentHeroStep.active.includes(idx);
-                  const isSorted = heroStep === heroDemoSteps.length - 1;
-
-                  // Dutch National Flag color scheme
-                  let colorStyle = 'bg-slate-800 border-slate-700 text-slate-200';
-                  if (val === 0) {
-                    colorStyle = 'bg-rose-500/20 border-rose-500/60 text-rose-300';
-                  } else if (val === 1) {
-                    colorStyle = 'bg-slate-300/20 border-slate-300/60 text-slate-100';
-                  } else if (val === 2) {
-                    colorStyle = 'bg-cyan-500/20 border-cyan-500/60 text-cyan-300';
-                  }
+              {/* Array Elements: 0 = Red, 1 = White, 2 = Blue */}
+              <div className="flex items-end justify-center gap-2 sm:gap-3 h-28 px-1 pb-1">
+                {currentStep.arr.map((val, idx) => {
+                  const isActive = currentStep.active.includes(idx);
+                  let colorClass = 'bg-slate-800/80 border-slate-700 text-slate-200';
+                  if (val === 0) colorClass = 'bg-rose-500/20 border-rose-500/50 text-rose-200';
+                  if (val === 1) colorClass = 'bg-slate-300/20 border-slate-200/50 text-slate-100';
+                  if (val === 2) colorClass = 'bg-cyan-500/20 border-cyan-400/50 text-cyan-200';
 
                   return (
                     <div key={idx} className="flex flex-col items-center justify-end h-full">
                       <div
-                        className={`w-9 sm:w-12 h-20 rounded-xl border-2 flex flex-col items-center justify-center font-mono font-bold transition-all duration-300 ${colorStyle} ${
-                          isActive
-                            ? 'scale-105 shadow-lg shadow-cyan-500/30 ring-2 ring-cyan-400'
-                            : ''
+                        className={`w-9 sm:w-11 h-18 rounded-lg border flex flex-col items-center justify-center font-mono font-bold transition-all duration-200 ${colorClass} ${
+                          isActive ? 'ring-2 ring-cyan-400 scale-105 shadow-md shadow-cyan-500/20' : ''
                         }`}
                       >
-                        <span className="text-base sm:text-lg">{val}</span>
-                        <span className="text-[9px] font-mono text-slate-400">
+                        <span className="text-sm sm:text-base">{val}</span>
+                        <span className="text-[8px] opacity-75 font-mono">
                           {val === 0 ? 'Red' : val === 1 ? 'White' : 'Blue'}
                         </span>
                       </div>
-                      <span className="text-[10px] font-mono text-slate-500 mt-1">[{idx}]</span>
+                      <span className="text-[9px] font-mono text-slate-500 mt-1">[{idx}]</span>
                     </div>
                   );
                 })}
               </div>
 
-              {/* Step Action Notification & Line Sync */}
-              <div className="mt-4 p-3 rounded-xl bg-slate-900 border border-slate-800 text-xs font-mono flex items-center justify-between gap-2 min-w-0">
-                <span className="text-cyan-300 truncate">{currentHeroStep.action}</span>
-                <span className="text-amber-400 font-bold shrink-0">Line {currentHeroStep.line}</span>
+              {/* Step Notification Banner */}
+              <div className="mt-3.5 p-2.5 rounded-lg bg-black/40 border border-white/[0.06] text-xs font-mono flex items-center justify-between gap-2 min-w-0">
+                <span className="text-cyan-300 truncate text-[11px]">{currentStep.action}</span>
+                <span className="text-slate-500 text-[10px] shrink-0 font-bold">
+                  Step {stepIndex + 1}/{demoSteps.length}
+                </span>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Features Section (Required: Interactive Code Visualization, DSA Question Library, Step-by-Step Execution, Debugging and Variable Inspector) */}
-      <section id="features" className="py-14 sm:py-20 px-4 sm:px-6 lg:px-8 bg-[#070B14] border-t border-slate-800/80">
+      {/* Trust and Features Section */}
+      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 border-b border-white/[0.06] bg-[#070B15]">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-mono mb-3">
-              <Zap className="w-3.5 h-3.5 text-cyan-400" />
-              <span>Platform Capabilities</span>
-            </div>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold font-display text-white">
-              Engineered for Intuitive Learning
+          <div className="text-center max-w-xl mx-auto mb-12 sm:mb-14">
+            <h2 className="text-2xl sm:text-3xl font-extrabold font-display text-white">
+              Why Learn With Zecode
             </h2>
-            <p className="mt-3 text-xs sm:text-sm text-slate-400 leading-relaxed">
-              Stop guessing pointer movements and recursive call stacks. Zecode turns abstract algorithmic logic into verified, observable steps.
+            <p className="mt-2 text-xs sm:text-sm text-slate-400">
+              Built specifically to demystify complex algorithms through verified, step-by-step clarity.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
-            {/* Feature 1: Interactive Code Visualization */}
-            <div className="h-full flex flex-col justify-between p-6 rounded-2xl bg-glass-card border border-slate-800/80 hover:border-cyan-500/50 hover:shadow-lg hover:shadow-cyan-500/10 transition-all duration-300 group">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            {/* 1. See Code Execute */}
+            <div className="surface-card p-6 flex flex-col justify-between">
               <div>
-                <div className="w-12 h-12 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform shrink-0">
-                  <Layers className="w-6 h-6 text-cyan-400" />
+                <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/25 flex items-center justify-center text-cyan-400 mb-4">
+                  <Play className="w-5 h-5 fill-current" />
                 </div>
-                <h3 className="text-lg font-bold text-white mb-2">Interactive Code Visualization</h3>
-                <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                  Watch multi-pointer arrays (low, mid, high), linked lists, stacks, trees, and grids animate with clear state transitions.
+                <h3 className="text-base font-bold text-white mb-1.5 font-display">
+                  See Code Execute.
+                </h3>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Watch multi-pointer arrays, linked lists, stacks, trees, and matrices animate in real-time as statements run.
                 </p>
               </div>
             </div>
 
-            {/* Feature 2: DSA Question Library */}
-            <div className="h-full flex flex-col justify-between p-6 rounded-2xl bg-glass-card border border-slate-800/80 hover:border-amber-500/50 hover:shadow-lg hover:shadow-amber-500/10 transition-all duration-300 group">
+            {/* 2. Explore DSA Problems */}
+            <div className="surface-card p-6 flex flex-col justify-between">
               <div>
-                <div className="w-12 h-12 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform shrink-0">
-                  <BookOpen className="w-6 h-6 text-amber-400" />
+                <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-center text-amber-400 mb-4">
+                  <BookOpen className="w-5 h-5" />
                 </div>
-                <h3 className="text-lg font-bold text-white mb-2">DSA Question Library</h3>
-                <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                  Curated curriculum organized across 13 core categories with starter code in C, C++, Python, and Java, test cases, and Big-O analysis.
+                <h3 className="text-base font-bold text-white mb-1.5 font-display">
+                  Explore DSA Problems.
+                </h3>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Practice curated problems organized across 13 core topics with starter solutions in Python, C++, Java, and C.
                 </p>
               </div>
             </div>
 
-            {/* Feature 3: Step-by-Step Execution */}
-            <div className="h-full flex flex-col justify-between p-6 rounded-2xl bg-glass-card border border-slate-800/80 hover:border-emerald-500/50 hover:shadow-lg hover:shadow-emerald-500/10 transition-all duration-300 group">
+            {/* 3. Debug Step by Step */}
+            <div className="surface-card p-6 flex flex-col justify-between">
               <div>
-                <div className="w-12 h-12 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform shrink-0">
-                  <Play className="w-6 h-6 text-emerald-400" />
+                <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/25 flex items-center justify-center text-purple-400 mb-4">
+                  <Bug className="w-5 h-5" />
                 </div>
-                <h3 className="text-lg font-bold text-white mb-2">Step-by-Step Execution</h3>
-                <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                  Play, pause, step forward, rewind, or jump to any step with precise speed controls and plain-English step explanations.
+                <h3 className="text-base font-bold text-white mb-1.5 font-display">
+                  Debug Step by Step.
+                </h3>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Inspect variables, pointer positions, and memory states at every atomic operation without guessing.
                 </p>
               </div>
             </div>
 
-            {/* Feature 4: Debugging and Variable Inspector */}
-            <div className="h-full flex flex-col justify-between p-6 rounded-2xl bg-glass-card border border-slate-800/80 hover:border-purple-500/50 hover:shadow-lg hover:shadow-purple-500/10 transition-all duration-300 group">
+            {/* 4. Learn at Your Own Pace */}
+            <div className="surface-card p-6 flex flex-col justify-between">
               <div>
-                <div className="w-12 h-12 rounded-xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform shrink-0">
-                  <Bug className="w-6 h-6 text-purple-400" />
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center text-emerald-400 mb-4">
+                  <Compass className="w-5 h-5" />
                 </div>
-                <h3 className="text-lg font-bold text-white mb-2">Debugging & Variable Inspector</h3>
-                <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                  Live state inspector table tracking pointers, loop counters, and data structures synchronized directly with Monaco Editor code lines.
+                <h3 className="text-base font-bold text-white mb-1.5 font-display">
+                  Learn at Your Own Pace.
+                </h3>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Control execution speed, pause anywhere, rewind to previous states, or test arbitrary custom inputs.
                 </p>
               </div>
             </div>
@@ -376,11 +373,11 @@ export default function Home({ setActivePage, onSelectQuestion }) {
       </section>
 
       {/* Popular DSA Questions Section */}
-      <section className="py-14 sm:py-20 px-4 sm:px-6 lg:px-8 bg-[#0B1120] border-t border-slate-800/80">
+      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 border-b border-white/[0.06] bg-[#060913]">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 sm:mb-10">
             <div>
-              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold font-display text-white">
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-extrabold font-display text-white">
                 Popular Curated Questions
               </h2>
               <p className="mt-1 text-xs sm:text-sm text-slate-400">
@@ -405,9 +402,10 @@ export default function Home({ setActivePage, onSelectQuestion }) {
                   onSelectQuestion(q);
                   setActivePage('visualizer');
                 }}
-                className="h-full p-5 sm:p-6 rounded-2xl bg-[#0F172A] border border-slate-800 hover:border-cyan-500/50 hover:scale-[1.01] transition-all cursor-pointer flex flex-col justify-between group shadow-lg min-w-0"
+                className="surface-card p-5 sm:p-6 cursor-pointer flex flex-col justify-between group min-w-0"
               >
                 <div>
+                  {/* Badges */}
                   <div className="flex items-center justify-between gap-2 mb-3 min-w-0">
                     <span className="badge badge-topic truncate">{q.topic}</span>
                     <span
@@ -423,23 +421,61 @@ export default function Home({ setActivePage, onSelectQuestion }) {
                     </span>
                   </div>
 
-                  <h3 className="text-base sm:text-lg font-bold text-white group-hover:text-cyan-400 transition-colors mb-2 truncate">
+                  {/* Title */}
+                  <h3 className="text-base font-bold text-white group-hover:text-cyan-300 transition-colors mb-2 truncate font-display">
                     {q.title}
                   </h3>
 
+                  {/* Description */}
                   <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed mb-4">
                     {q.description}
                   </p>
                 </div>
 
-                <div className="flex items-center justify-between pt-4 border-t border-slate-800/80 text-xs font-mono text-slate-500">
+                <div className="flex items-center justify-between pt-3.5 border-t border-white/[0.06] text-xs font-mono text-slate-400">
                   <span className="truncate mr-2">Time: {q.complexity?.time?.worst || 'O(N)'}</span>
-                  <span className="text-cyan-400 font-bold group-hover:translate-x-1 transition-transform inline-flex items-center gap-1 shrink-0">
+                  <span className="text-cyan-400 font-semibold group-hover:translate-x-1 transition-transform inline-flex items-center gap-1 shrink-0">
                     Solve & Visualize →
                   </span>
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA Section */}
+      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-[#070B15] to-[#060913] relative overflow-hidden">
+        <div className="max-w-4xl mx-auto text-center surface-card p-8 sm:p-12 border-cyan-500/20 relative">
+          <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 mx-auto mb-4">
+            <Sparkles className="w-6 h-6" />
+          </div>
+
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold font-display text-white">
+            Ready to Master Algorithms Step by Step?
+          </h2>
+
+          <p className="mt-3 text-xs sm:text-sm text-slate-300 max-w-lg mx-auto leading-relaxed">
+            Jump into our interactive visualizer now with Dutch National Flag, sorting algorithms, and pointer traversals.
+          </p>
+
+          <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
+            <button
+              onClick={() => {
+                onSelectQuestion(showcaseQuestion);
+                setActivePage('visualizer');
+              }}
+              className="btn-primary text-sm py-2.5 px-6"
+            >
+              <span>Start Visualizing Now</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setActivePage('library')}
+              className="btn-secondary text-sm py-2.5 px-6"
+            >
+              <span>Browse DSA Curriculum</span>
+            </button>
           </div>
         </div>
       </section>

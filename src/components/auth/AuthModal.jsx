@@ -7,7 +7,6 @@ import {
   CheckCircle2,
   AlertCircle,
   Sparkles,
-  ArrowRight,
   ShieldCheck,
   Eye,
   EyeOff

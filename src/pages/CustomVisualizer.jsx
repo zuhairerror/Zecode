@@ -313,10 +313,10 @@ export default function CustomVisualizer() {
   return (
     <div className="py-8 px-4 sm:px-6 lg:px-8 max-w-[1600px] mx-auto flex flex-col gap-6 min-h-screen">
       {/* Header Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-white/[0.08]">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Sparkles className="w-5 h-5 text-cyan-400" />
+            <Sparkles className="w-4 h-4 text-cyan-400" />
             <span className="text-xs font-mono uppercase tracking-wider text-cyan-400 font-bold">
               Custom Code Engine
             </span>
@@ -330,15 +330,15 @@ export default function CustomVisualizer() {
         </div>
 
         {/* Template Buttons */}
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-1.5 bg-white/[0.03] p-1 rounded-xl border border-white/[0.06]">
           {TEMPLATES.map((tmpl) => (
             <button
               key={tmpl.id}
               onClick={() => handleSelectTemplate(tmpl)}
               className={`px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition-all ${
                 selectedTemplate.id === tmpl.id
-                  ? 'bg-cyan-500 text-slate-950 font-bold shadow-md shadow-cyan-500/20'
-                  : 'bg-slate-900 border border-slate-800 text-slate-300 hover:text-white hover:border-slate-700'
+                  ? 'bg-cyan-500 text-slate-950 font-bold shadow-sm'
+                  : 'text-slate-400 hover:text-white'
               }`}
             >
               {tmpl.name}
@@ -348,7 +348,7 @@ export default function CustomVisualizer() {
       </div>
 
       {/* Pattern Detection Badge Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 text-xs font-mono">
+      <div className="surface-card flex flex-wrap items-center justify-between gap-3 p-3.5 border-white/[0.08] text-xs font-mono">
         <div className="flex items-center gap-2">
           <span className="text-slate-400">Detected Pattern:</span>
           <span className="text-cyan-300 font-bold px-2 py-0.5 rounded bg-cyan-500/10 border border-cyan-500/20">
@@ -360,12 +360,12 @@ export default function CustomVisualizer() {
           <span className="text-slate-400">Visualization Status:</span>
           {isPatternSupported ? (
             <span className="text-emerald-400 font-bold flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
               Synchronized Trace Ready ({steps.length} steps)
             </span>
           ) : (
             <span className="text-amber-400 font-bold flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-amber-400"></span>
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
               Execution Only (No pattern match)
             </span>
           )}
@@ -377,7 +377,7 @@ export default function CustomVisualizer() {
         {/* Left Column: Monaco Code Editor (6 cols) */}
         <div className="lg:col-span-6 flex flex-col gap-4">
           {/* Custom Array Input */}
-          <div className="p-4 rounded-xl bg-[#0F172A] border border-slate-800 flex flex-col gap-2">
+          <div className="surface-card p-4 border-white/[0.08] flex flex-col gap-2">
             <div className="flex items-center justify-between">
               <label className="text-xs font-mono text-slate-300 font-bold">
                 Target Array Input (JSON):
@@ -392,7 +392,7 @@ export default function CustomVisualizer() {
                 value={customArrayStr}
                 onChange={(e) => setCustomArrayStr(e.target.value)}
                 placeholder="[2, 0, 2, 1, 1, 0]"
-                className="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono text-slate-200 focus:outline-none focus:border-cyan-400"
+                className="flex-1 bg-black/50 border border-white/[0.08] rounded-lg px-3 py-2 text-xs font-mono text-slate-200 focus:outline-none focus:border-cyan-400"
               />
               <button
                 onClick={handleApplyCustomArray}

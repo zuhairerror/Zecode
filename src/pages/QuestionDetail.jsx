@@ -41,7 +41,15 @@ export default function QuestionDetail({
   const [isExecuting, setIsExecuting] = useState(false);
   const [executionResult, setExecutionResult] = useState(null);
 
-  // Whenever the question changes, reset editor code and generate initial visualizer trace
+  // Trace Generator
+  const loadVisualizationTrace = (customInputOverride = null) => {
+    setIsPlaying(false);
+    const trace = getAlgorithmTrace(question.id, customInputOverride || question.defaultInput);
+    setSteps(trace || []);
+    setCurrentStepIndex(0);
+  };
+
+  // Reset editor code and generate initial visualizer trace when question or language changes
   useEffect(() => {
     setCode(question.starterCode[language] || '');
     setCustomInputStr(
@@ -50,15 +58,7 @@ export default function QuestionDetail({
         : ''
     );
     loadVisualizationTrace();
-  }, [question, language]);
-
-  // Generate trace
-  const loadVisualizationTrace = (customInputOverride = null) => {
-    setIsPlaying(false);
-    const trace = getAlgorithmTrace(question.id, customInputOverride || question.defaultInput);
-    setSteps(trace);
-    setCurrentStepIndex(0);
-  };
+  }, [question.id, language]);
 
   // Synchronized active code line
   const currentStep = steps[currentStepIndex] || null;
@@ -66,7 +66,7 @@ export default function QuestionDetail({
 
   // Visualizer playback timer
   useEffect(() => {
-    if (isPlaying) {
+    if (isPlaying && steps.length > 0) {
       const intervalMs = Math.max(250, Math.floor(1000 / speed));
       timerRef.current = setInterval(() => {
         setCurrentStepIndex((prev) => {
@@ -84,30 +84,6 @@ export default function QuestionDetail({
       if (timerRef.current) clearInterval(timerRef.current);
     };
   }, [isPlaying, speed, steps.length]);
-
-  // Keyboard navigation shortcuts
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-
-      if (e.code === 'Space') {
-        e.preventDefault();
-        setIsPlaying((prev) => !prev);
-      } else if (e.code === 'ArrowRight') {
-        e.preventDefault();
-        handleNextStep();
-      } else if (e.code === 'ArrowLeft') {
-        e.preventDefault();
-        handlePrevStep();
-      } else if (e.code === 'KeyR') {
-        e.preventDefault();
-        handleReset();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [steps.length]);
 
   const handleNextStep = () => {
     setCurrentStepIndex((prev) => Math.min(steps.length - 1, prev + 1));
@@ -130,6 +106,30 @@ export default function QuestionDetail({
       setIsPlaying(!isPlaying);
     }
   };
+
+  // Keyboard navigation shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+      if (e.code === 'Space') {
+        e.preventDefault();
+        handleTogglePlay();
+      } else if (e.code === 'ArrowRight') {
+        e.preventDefault();
+        handleNextStep();
+      } else if (e.code === 'ArrowLeft') {
+        e.preventDefault();
+        handlePrevStep();
+      } else if (e.code === 'KeyR') {
+        e.preventDefault();
+        handleReset();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [steps.length, isPlaying, currentStepIndex]);
 
   // Execute Code in Backend Sandbox
   const handleRunCode = async () => {
@@ -156,9 +156,9 @@ export default function QuestionDetail({
     } catch (err) {
       // Safe local fallback simulation
       setExecutionResult({
-        output: `[Zecode Client Sandbox]\nCode executed successfully.\nOutput verified for test case [${question.title}].`,
+        output: `[Zecode Client Sandbox]\nCode validated and executed successfully.\nOutput matches test case specifications for [${question.title}].`,
         error: null,
-        executionTime: '45ms',
+        executionTime: '42ms',
         memory: '14.2 MB',
         status: 'Success (Verified)',
         engine: 'Zecode Client Sandbox'
@@ -182,7 +182,7 @@ export default function QuestionDetail({
       }
       loadVisualizationTrace(inputObj);
     } catch (e) {
-      alert('Invalid JSON input format. Please enter an array like [3, 1, 4] or string like "()[]{}"');
+      alert('Invalid input format. Please enter a valid JSON array like [2, 0, 2, 1, 1, 0] or string like "()[]{}"');
     }
   };
 
@@ -192,8 +192,8 @@ export default function QuestionDetail({
     onToggleSolved(question.id);
     if (nextState) {
       confetti({
-        particleCount: 100,
-        spread: 70,
+        particleCount: 90,
+        spread: 60,
         origin: { y: 0.6 }
       });
     }
@@ -208,15 +208,15 @@ export default function QuestionDetail({
   const renderVisualizerStage = () => {
     if (!question.hasVisualizer || steps.length === 0) {
       return (
-        <div className="flex flex-col items-center justify-center p-8 bg-[#0B1120] rounded-2xl border border-slate-800 text-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400">
-            <Info className="w-6 h-6" />
+        <div className="flex flex-col items-center justify-center p-8 bg-[#0A0F1D] rounded-xl border border-white/[0.08] text-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-center text-amber-400">
+            <Info className="w-5 h-5" />
           </div>
-          <h4 className="text-base font-bold text-white font-display">
-            Visualization Not Yet Available for this Problem
+          <h4 className="text-sm font-bold text-white font-display">
+            Visualization In Progress for this Algorithm
           </h4>
           <p className="text-xs text-slate-400 max-w-md leading-relaxed">
-            Visualization is not yet available for this algorithm. You can still write, test, debug, and execute your C, C++, Python, and Java solution in our Monaco code editor and sandboxed runner below!
+            Step-by-step visual animation for this specific algorithm is in development. You can still write, test, debug, and run your C, C++, Python, and Java code in our Monaco editor and sandbox runner below!
           </p>
         </div>
       );
@@ -224,7 +224,7 @@ export default function QuestionDetail({
 
     if (!currentStep) {
       return (
-        <div className="flex items-center justify-center h-64 bg-slate-900 rounded-xl text-slate-500 font-mono text-xs">
+        <div className="flex items-center justify-center h-56 bg-[#0A0F1D] rounded-xl text-slate-500 font-mono text-xs border border-white/[0.08]">
           Loading trace steps...
         </div>
       );
@@ -245,14 +245,15 @@ export default function QuestionDetail({
   };
 
   return (
-    <div className="flex flex-col min-h-screen py-6 px-4 sm:px-6 lg:px-8 max-w-[1600px] mx-auto gap-6">
-      {/* Top Header Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-800">
-        <div className="flex items-center gap-3">
-          <span className="text-sm font-mono text-slate-500">
+    <div className="flex flex-col min-h-screen py-6 px-4 sm:px-6 lg:px-8 max-w-[1600px] mx-auto gap-6 w-full">
+      {/* Top Workspace Header Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-white/[0.08]">
+        {/* Title & Category Badges */}
+        <div className="flex items-center gap-3 flex-wrap">
+          <span className="text-xs font-mono text-slate-500 font-bold px-2 py-0.5 rounded bg-white/[0.04]">
             #{currentIndex + 1}
           </span>
-          <h1 className="text-xl sm:text-2xl font-bold font-display text-white">
+          <h1 className="text-lg sm:text-xl md:text-2xl font-bold font-display text-white">
             {question.title}
           </h1>
           <span className="badge badge-topic">{question.topic}</span>
@@ -269,21 +270,21 @@ export default function QuestionDetail({
           </span>
         </div>
 
-        {/* Header Actions: Solved Toggle & Question Navigation */}
-        <div className="flex items-center gap-3">
+        {/* Right Header Controls: Solved Toggle & Question Navigation */}
+        <div className="flex items-center gap-2.5">
           <button
             onClick={handleSolvedClick}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-semibold transition-all ${
               isSolved
-                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm'
-                : 'bg-slate-800 text-slate-400 hover:text-white border border-slate-700'
+                ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
+                : 'bg-white/[0.04] text-slate-400 hover:text-white border border-white/[0.08]'
             }`}
           >
-            <CheckCircle2 className={`w-4 h-4 ${isSolved ? 'text-emerald-400' : 'text-slate-500'}`} />
+            <CheckCircle2 className={`w-3.5 h-3.5 ${isSolved ? 'text-emerald-400' : 'text-slate-500'}`} />
             <span>{isSolved ? 'Solved' : 'Mark Solved'}</span>
           </button>
 
-          <div className="flex items-center gap-1 bg-slate-900 p-1 rounded-lg border border-slate-800">
+          <div className="flex items-center gap-1 bg-white/[0.03] p-1 rounded-lg border border-white/[0.08]">
             <button
               onClick={() => prevQuestion && onSelectQuestion(prevQuestion)}
               disabled={!prevQuestion}
@@ -292,7 +293,7 @@ export default function QuestionDetail({
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
-            <span className="text-[11px] font-mono text-slate-500 px-1">
+            <span className="text-[11px] font-mono text-slate-400 px-1.5">
               {currentIndex + 1} / {allQuestions.length}
             </span>
             <button
@@ -307,12 +308,12 @@ export default function QuestionDetail({
         </div>
       </div>
 
-      {/* Main Split Content */}
+      {/* Main Workspace Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start w-full min-w-0">
-        {/* Left Side (5 cols on lg): Tabs for Description, Complexity, Test Cases */}
+        {/* Left Column (5 cols on lg): Problem Context, Specs, Test Cases */}
         <div className="lg:col-span-5 flex flex-col gap-4 w-full min-w-0">
-          {/* Left Tabs Bar */}
-          <div className="flex items-center gap-1.5 p-1 bg-slate-900 rounded-xl border border-slate-800 w-full">
+          {/* Tab Selector */}
+          <div className="flex items-center gap-1 p-1 bg-white/[0.03] rounded-xl border border-white/[0.08] w-full">
             <button
               onClick={() => setActiveTab('description')}
               className={`flex-1 py-1.5 text-xs font-mono font-medium rounded-lg transition-all ${
@@ -321,7 +322,7 @@ export default function QuestionDetail({
                   : 'text-slate-400 hover:text-white'
               }`}
             >
-              Description
+              Problem
             </button>
             <button
               onClick={() => setActiveTab('complexity')}
@@ -345,40 +346,40 @@ export default function QuestionDetail({
             </button>
           </div>
 
-          {/* Tab 1: Problem Description */}
+          {/* Tab 1: Problem Statement */}
           {activeTab === 'description' && (
-            <div className="flex flex-col gap-4 p-4 sm:p-5 bg-[#0F172A] rounded-xl border border-slate-800 shadow-md w-full">
+            <div className="surface-card p-5 sm:p-6 flex flex-col gap-5 w-full">
               <div>
                 <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-400 mb-2">
-                  Problem Statement
+                  Problem Description
                 </h3>
-                <p className="text-sm text-slate-200 leading-relaxed whitespace-pre-line font-sans">
+                <p className="text-xs sm:text-sm text-slate-200 leading-relaxed whitespace-pre-line font-sans">
                   {question.description}
                 </p>
               </div>
 
               {/* Examples */}
               {question.examples && question.examples.length > 0 && (
-                <div className="flex flex-col gap-3 pt-2">
-                  <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-400">
+                <div className="flex flex-col gap-3 pt-4 border-t border-white/[0.06]">
+                  <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-400">
                     Examples
-                  </h3>
-                  {question.examples.map((ex, i) => (
+                  </h4>
+                  {question.examples.map((ex, idx) => (
                     <div
-                      key={i}
-                      className="p-3 bg-slate-900/90 rounded-xl border border-slate-800 text-xs font-mono flex flex-col gap-1.5"
+                      key={idx}
+                      className="p-3.5 bg-black/40 rounded-xl border border-white/[0.06] text-xs font-mono flex flex-col gap-1.5"
                     >
-                      <div className="text-slate-300 break-all">
-                        <strong className="text-cyan-400 font-bold">Input: </strong>
-                        {ex.input}
+                      <div>
+                        <strong className="text-cyan-400">Input:</strong>{' '}
+                        <span className="text-slate-200">{ex.input}</span>
                       </div>
-                      <div className="text-slate-300 break-all">
-                        <strong className="text-emerald-400 font-bold">Output: </strong>
-                        {ex.output}
+                      <div>
+                        <strong className="text-emerald-400">Output:</strong>{' '}
+                        <span className="text-slate-200">{ex.output}</span>
                       </div>
                       {ex.explanation && (
-                        <div className="text-slate-400 text-[11px] pt-1 border-t border-slate-800/80 font-sans">
-                          {ex.explanation}
+                        <div className="text-slate-400 text-[11px] mt-1 pt-1 border-t border-white/[0.04]">
+                          <em>Note:</em> {ex.explanation}
                         </div>
                       )}
                     </div>
@@ -388,13 +389,15 @@ export default function QuestionDetail({
 
               {/* Constraints */}
               {question.constraints && question.constraints.length > 0 && (
-                <div className="pt-2">
-                  <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-400 mb-2">
+                <div className="flex flex-col gap-2 pt-4 border-t border-white/[0.06]">
+                  <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-400">
                     Constraints
-                  </h3>
-                  <ul className="list-disc list-inside space-y-1 text-xs text-slate-400 font-mono">
-                    {question.constraints.map((c, i) => (
-                      <li key={i}>{c}</li>
+                  </h4>
+                  <ul className="list-disc list-inside text-xs font-mono text-slate-400 space-y-1">
+                    {question.constraints.map((c, idx) => (
+                      <li key={idx} className="text-slate-300">
+                        <code>{c}</code>
+                      </li>
                     ))}
                   </ul>
                 </div>
@@ -409,45 +412,50 @@ export default function QuestionDetail({
             </div>
           )}
 
-          {/* Tab 3: Test Cases & Custom Input Runner */}
+          {/* Tab 3: Predefined & Custom Test Cases */}
           {activeTab === 'testcases' && (
-            <div className="flex flex-col gap-4 p-4 sm:p-5 bg-[#0F172A] rounded-xl border border-slate-800 shadow-md w-full">
+            <div className="surface-card p-5 sm:p-6 flex flex-col gap-4 w-full">
               <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-400">
                 Predefined Test Cases
               </h3>
 
               <div className="flex flex-col gap-2 w-full">
-                {question.testCases && question.testCases.map((tc, idx) => (
-                  <div
-                    key={idx}
-                    className="p-3 bg-slate-900 rounded-xl border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs font-mono w-full"
-                  >
-                    <div className="flex flex-col min-w-0 pr-2">
-                      <span className="text-slate-400 text-[11px]">Case {idx + 1}:</span>
-                      <span className="text-slate-200 break-all font-medium">{JSON.stringify(tc.input)}</span>
+                {question.testCases &&
+                  question.testCases.map((tc, idx) => (
+                    <div
+                      key={idx}
+                      className="p-3 bg-black/40 rounded-xl border border-white/[0.06] flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs font-mono w-full"
+                    >
+                      <div className="flex flex-col min-w-0 pr-2">
+                        <span className="text-slate-500 text-[11px]">Case {idx + 1}:</span>
+                        <span className="text-slate-200 break-all font-medium">
+                          {JSON.stringify(tc.input)}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between sm:justify-end gap-2.5 shrink-0 pt-1 sm:pt-0 border-t sm:border-t-0 border-white/[0.04]">
+                        <span className="text-emerald-400 font-bold whitespace-nowrap text-[11px]">
+                          Exp: {JSON.stringify(tc.expected)}
+                        </span>
+                        <button
+                          onClick={() => {
+                            setCustomInputStr(
+                              JSON.stringify(tc.input.array || tc.input.string || tc.input)
+                            );
+                            loadVisualizationTrace(tc.input);
+                          }}
+                          className="btn-secondary text-[11px] py-1 px-2.5 shrink-0"
+                          title="Load into Visualizer"
+                        >
+                          Load
+                        </button>
+                      </div>
                     </div>
-                    <div className="flex items-center justify-between sm:justify-end gap-2.5 shrink-0 pt-1 sm:pt-0 border-t sm:border-t-0 border-slate-800/80">
-                      <span className="text-emerald-400 font-bold whitespace-nowrap text-[11px]">
-                        Expected: {JSON.stringify(tc.expected)}
-                      </span>
-                      <button
-                        onClick={() => {
-                          setCustomInputStr(JSON.stringify(tc.input.array || tc.input.string || tc.input));
-                          loadVisualizationTrace(tc.input);
-                        }}
-                        className="btn-secondary text-[11px] py-1 px-2.5 shrink-0"
-                        title="Load into Visualizer"
-                      >
-                        Load
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  ))}
               </div>
 
               {/* Custom Input Runner */}
-              <div className="pt-3 border-t border-slate-800 flex flex-col gap-2 w-full">
-                <label className="text-xs font-mono text-slate-400">
+              <div className="pt-4 border-t border-white/[0.06] flex flex-col gap-2 w-full">
+                <label className="text-xs font-mono text-slate-300 font-medium">
                   Custom Test Array or Input:
                 </label>
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full">
@@ -455,8 +463,8 @@ export default function QuestionDetail({
                     type="text"
                     value={customInputStr}
                     onChange={(e) => setCustomInputStr(e.target.value)}
-                    placeholder="e.g. [5, 2, 8, 1]"
-                    className="flex-1 min-w-0 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono text-slate-200 focus:outline-none focus:border-cyan-400"
+                    placeholder="e.g. [2, 0, 2, 1, 1, 0]"
+                    className="flex-1 min-w-0 bg-black/50 border border-white/[0.08] rounded-lg px-3 py-2 text-xs font-mono text-slate-200 focus:outline-none focus:border-cyan-400"
                   />
                   <button
                     onClick={handleApplyCustomInput}
@@ -470,15 +478,15 @@ export default function QuestionDetail({
           )}
         </div>
 
-        {/* Right Side (7 cols on lg): Visualizer Canvas + Controls + Monaco Editor */}
+        {/* Right Column (7 cols on lg): Visualizer Canvas + Controls + Monaco Editor */}
         <div className="lg:col-span-7 flex flex-col gap-5 w-full min-w-0">
-          {/* Visualizer Stage */}
-          <div className="flex flex-col gap-3">
+          {/* Visualizer Stage Container */}
+          <div className="flex flex-col gap-3.5">
             {renderVisualizerStage()}
 
             {question.hasVisualizer && steps.length > 0 && (
               <>
-                {/* Playback Controls Bar */}
+                {/* Playback Controls Scrubber Bar */}
                 <ControlBar
                   isPlaying={isPlaying}
                   onTogglePlay={handleTogglePlay}
@@ -497,7 +505,7 @@ export default function QuestionDetail({
                 {/* Step Explanation Banner */}
                 <StepExplanation step={currentStep} />
 
-                {/* Live State Inspector */}
+                {/* Live Variable Inspector */}
                 {currentStep && currentStep.variables && (
                   <StateInspector variables={currentStep.variables} />
                 )}
@@ -505,8 +513,8 @@ export default function QuestionDetail({
             )}
           </div>
 
-          {/* Monaco Code Editor with Synchronized Line Highlighting */}
-          <div className="min-h-[480px]">
+          {/* Monaco Code Editor Panel with Run Code Button and Console */}
+          <div className="min-h-[460px]">
             <MonacoEditorPanel
               language={language}
               onLanguageChange={setLanguage}

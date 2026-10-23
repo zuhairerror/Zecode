@@ -30,10 +30,10 @@ export default function ArrayVisualizer({ currentStep }) {
   });
 
   return (
-    <div className="flex flex-col items-center justify-center w-full min-h-[300px] p-4 sm:p-6 bg-[#0B1120] rounded-2xl border border-slate-800 shadow-inner relative overflow-x-auto min-w-0">
+    <div className="surface-card flex flex-col items-center justify-center w-full min-h-[300px] p-4 sm:p-6 border-white/[0.08] shadow-inner relative overflow-x-auto min-w-0">
       {/* Dutch National Flag Invariant Banner (if Sort Colors) */}
       {isSortColors && (
-        <div className="w-full flex flex-wrap items-center justify-between gap-2 mb-4 px-3 py-2 rounded-xl bg-slate-900/90 border border-slate-800 text-[11px] font-mono">
+        <div className="w-full flex flex-wrap items-center justify-between gap-2 mb-4 px-3.5 py-2 rounded-xl bg-black/40 border border-white/[0.06] text-[11px] font-mono">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-cyan-400"></span>
             <span className="text-slate-300 font-bold">Dutch National Flag Invariants:</span>
