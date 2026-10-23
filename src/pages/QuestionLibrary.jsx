@@ -1,0 +1,284 @@
+import React, { useState, useMemo } from 'react';
+import {
+  Search,
+  CheckCircle2,
+  Sparkles,
+  BookOpen,
+  Terminal
+} from 'lucide-react';
+import { QUESTIONS_DATA, TOPICS, DIFFICULTIES } from '../data/questionsData';
+
+export default function QuestionLibrary({ onSelectQuestion, setActivePage, solvedIds = [] }) {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedTopic, setSelectedTopic] = useState('All');
+  const [selectedDifficulty, setSelectedDifficulty] = useState('All');
+  const [statusFilter, setStatusFilter] = useState('All'); // All, Solved, Unsolved
+  const [visFilter, setVisFilter] = useState('All'); // All, Visualizer Ready, Sandbox Only
+
+  // Filtered Questions
+  const filteredQuestions = useMemo(() => {
+    return QUESTIONS_DATA.filter((q) => {
+      // 1. Search Query
+      const matchesSearch =
+        q.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        q.topic.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        q.description.toLowerCase().includes(searchQuery.toLowerCase());
+
+      // 2. Topic Filter
+      const matchesTopic = selectedTopic === 'All' || q.topic === selectedTopic;
+
+      // 3. Difficulty Filter
+      const matchesDifficulty =
+        selectedDifficulty === 'All' || q.difficulty === selectedDifficulty;
+
+      // 4. Solved Filter
+      const isSolved = solvedIds.includes(q.id);
+      const matchesStatus =
+        statusFilter === 'All' ||
+        (statusFilter === 'Solved' && isSolved) ||
+        (statusFilter === 'Unsolved' && !isSolved);
+
+      // 5. Visualizer Availability Filter
+      const matchesVis =
+        visFilter === 'All' ||
+        (visFilter === 'Visualizer Ready' && q.hasVisualizer) ||
+        (visFilter === 'Sandbox Only' && !q.hasVisualizer);
+
+      return matchesSearch && matchesTopic && matchesDifficulty && matchesStatus && matchesVis;
+    });
+  }, [searchQuery, selectedTopic, selectedDifficulty, statusFilter, visFilter, solvedIds]);
+
+  const totalVisual = QUESTIONS_DATA.filter((q) => q.hasVisualizer).length;
+
+  return (
+    <div className="py-8 sm:py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col gap-6 sm:gap-8 min-h-screen w-full overflow-x-hidden">
+      {/* Header & Stats Banner */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-slate-800">
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <BookOpen className="w-5 h-5 text-cyan-400" />
+            <span className="text-xs font-mono uppercase tracking-wider text-cyan-400 font-bold">
+              Curated Curriculum
+            </span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold font-display text-white">
+            DSA Question Library
+          </h1>
+          <p className="mt-1 text-xs sm:text-sm text-slate-400">
+            Browse and practice problems complete with test cases, starter code in 4 languages, and interactive visual traces.
+          </p>
+        </div>
+
+        {/* Stats Pill */}
+        <div className="grid grid-cols-3 sm:flex items-center gap-2 sm:gap-4 bg-slate-900 p-3 sm:p-4 rounded-2xl border border-slate-800 shrink-0 text-center sm:text-left">
+          <div className="flex flex-col">
+            <span className="text-[11px] font-mono text-slate-400">Curated</span>
+            <span className="text-lg sm:text-xl font-bold font-mono text-white">{QUESTIONS_DATA.length}</span>
+          </div>
+          <div className="hidden sm:block h-8 w-px bg-slate-800"></div>
+          <div className="flex flex-col">
+            <span className="text-[11px] font-mono text-slate-400">Solved</span>
+            <span className="text-lg sm:text-xl font-bold font-mono text-emerald-400">
+              {solvedIds.length} / {QUESTIONS_DATA.length}
+            </span>
+          </div>
+          <div className="hidden sm:block h-8 w-px bg-slate-800"></div>
+          <div className="flex flex-col">
+            <span className="text-[11px] font-mono text-slate-400">Visual Ready</span>
+            <span className="text-lg sm:text-xl font-bold font-mono text-cyan-400">{totalVisual}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Search & Filter Controls */}
+      <div className="flex flex-col gap-4 bg-[#0F172A] p-4 sm:p-5 rounded-2xl border border-slate-800 shadow-md w-full min-w-0">
+        {/* Search Bar */}
+        <div className="relative">
+          <Search className="w-4 h-4 text-slate-400 absolute left-4 top-3.5" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search problems by name, category, or keyword (e.g. 'Sort Colors', 'two sum', 'binary search')..."
+            className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-11 pr-4 py-2.5 text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-400 font-mono transition-colors"
+          />
+        </div>
+
+        {/* Filter Pills */}
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
+          {/* Difficulty Buttons */}
+          <div className="flex items-center gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800 overflow-x-auto">
+            {DIFFICULTIES.map((diff) => (
+              <button
+                key={diff}
+                onClick={() => setSelectedDifficulty(diff)}
+                className={`px-2.5 sm:px-3 py-1 text-xs font-mono rounded-lg transition-all whitespace-nowrap ${
+                  selectedDifficulty === diff
+                    ? 'bg-cyan-500 text-slate-950 font-bold shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                {diff}
+              </button>
+            ))}
+          </div>
+
+          {/* Solved Status Filter */}
+          <div className="flex items-center gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800 overflow-x-auto">
+            {['All', 'Solved', 'Unsolved'].map((st) => (
+              <button
+                key={st}
+                onClick={() => setStatusFilter(st)}
+                className={`px-2.5 sm:px-3 py-1 text-xs font-mono rounded-lg transition-all whitespace-nowrap ${
+                  statusFilter === st
+                    ? 'bg-cyan-500 text-slate-950 font-bold shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                {st}
+              </button>
+            ))}
+          </div>
+
+          {/* Visualizer Status Filter */}
+          <div className="flex items-center gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800 overflow-x-auto">
+            {['All', 'Visualizer Ready', 'Sandbox Only'].map((vf) => (
+              <button
+                key={vf}
+                onClick={() => setVisFilter(vf)}
+                className={`px-2.5 sm:px-3 py-1 text-xs font-mono rounded-lg transition-all whitespace-nowrap ${
+                  visFilter === vf
+                    ? 'bg-cyan-500 text-slate-950 font-bold shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                {vf}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Topics Filter Row */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 pt-1 scrollbar-thin">
+          {TOPICS.map((topic) => (
+            <button
+              key={topic}
+              onClick={() => setSelectedTopic(topic)}
+              className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
+                selectedTopic === topic
+                  ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-400/50 shadow-sm'
+                  : 'bg-slate-900/80 text-slate-400 hover:text-slate-200 border border-slate-800'
+              }`}
+            >
+              {topic}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Question Results Count */}
+      <div className="flex items-center justify-between text-xs font-mono text-slate-400 px-1">
+        <span>
+          Showing <strong className="text-white">{filteredQuestions.length}</strong> of{' '}
+          {QUESTIONS_DATA.length} problems
+        </span>
+      </div>
+
+      {/* Questions Grid */}
+      {filteredQuestions.length === 0 ? (
+        <div className="p-10 text-center rounded-2xl bg-[#0F172A] border border-slate-800">
+          <BookOpen className="w-10 h-10 text-slate-600 mx-auto mb-3" />
+          <h3 className="text-base font-bold text-white mb-1">No matching problems found</h3>
+          <p className="text-xs text-slate-400 mb-4">
+            Try adjusting your search terms or resetting difficulty / topic filters.
+          </p>
+          <button
+            onClick={() => {
+              setSearchQuery('');
+              setSelectedTopic('All');
+              setSelectedDifficulty('All');
+              setStatusFilter('All');
+              setVisFilter('All');
+            }}
+            className="btn-secondary text-xs py-2 px-4 mx-auto"
+          >
+            Reset Filters
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 w-full">
+          {filteredQuestions.map((q, idx) => {
+            const isSolved = solvedIds.includes(q.id);
+
+            return (
+              <div
+                key={q.id}
+                onClick={() => {
+                  onSelectQuestion(q);
+                  setActivePage('visualizer');
+                }}
+                className="p-5 sm:p-6 rounded-2xl bg-[#0F172A] border border-slate-800 hover:border-cyan-500/50 hover:scale-[1.01] transition-all cursor-pointer flex flex-col justify-between group shadow-lg min-w-0"
+              >
+                <div>
+                  {/* Top Badges */}
+                  <div className="flex items-center justify-between gap-2 mb-3 min-w-0">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <span className="text-[11px] font-mono text-slate-500 shrink-0">#{idx + 1}</span>
+                      <span className="badge badge-topic truncate">{q.topic}</span>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span
+                        className={`badge ${
+                          q.difficulty === 'Easy'
+                            ? 'badge-easy'
+                            : q.difficulty === 'Medium'
+                            ? 'badge-medium'
+                            : 'badge-hard'
+                        }`}
+                      >
+                        {q.difficulty}
+                      </span>
+                      {isSolved && (
+                        <CheckCircle2 className="w-4 h-4 text-emerald-400" title="Solved" />
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Title */}
+                  <h3 className="text-base sm:text-lg font-bold text-white group-hover:text-cyan-400 transition-colors mb-2 truncate">
+                    {q.title}
+                  </h3>
+
+                  {/* Description preview */}
+                  <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed mb-4">
+                    {q.description}
+                  </p>
+                </div>
+
+                {/* Footer metadata */}
+                <div className="pt-3 border-t border-slate-800 flex items-center justify-between text-xs font-mono">
+                  {q.hasVisualizer ? (
+                    <div className="flex items-center gap-1.5 text-cyan-300 truncate">
+                      <Sparkles className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                      <span className="text-[11px] font-bold truncate">Visualizer Ready</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1.5 text-slate-400 truncate">
+                      <Terminal className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                      <span className="text-[11px] truncate">Sandbox Execution</span>
+                    </div>
+                  )}
+
+                  <span className="text-cyan-400 group-hover:translate-x-1 transition-transform font-bold flex items-center gap-1 shrink-0">
+                    Visualize →
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
