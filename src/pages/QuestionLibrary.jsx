@@ -93,27 +93,38 @@ export default function QuestionLibrary({ onSelectQuestion, setActivePage, solve
 
       {/* Search & Filter Controls */}
       <div className="surface-card p-4 sm:p-5 flex flex-col gap-4 border-white/[0.08] w-full min-w-0">
-        {/* Search Bar */}
+        {/* Prominent Search Bar */}
         <div className="relative">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+          <Search className="w-5 h-5 text-cyan-400 absolute left-4 top-3.5" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search problems by title, topic, or keyword (e.g. 'Sort Colors', 'Two Sum', 'Binary Search')..."
-            className="w-full bg-black/40 border border-white/[0.08] rounded-xl pl-10 pr-4 py-2 text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-400 font-mono transition-colors"
+            placeholder="Search 26 problems by title, topic, or keyword (e.g. 'Sort Colors', 'Two Sum', 'Binary Search')..."
+            className="w-full bg-black/50 border border-white/[0.1] rounded-xl pl-12 pr-10 py-3 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-cyan-400 font-sans transition-all"
           />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3.5 top-3.5 text-xs text-slate-400 hover:text-white px-1.5 py-0.5 rounded bg-white/[0.06]"
+            >
+              Clear
+            </button>
+          )}
         </div>
 
-        {/* Filter Pills */}
+        {/* Filter Bar: Difficulty & Status */}
         <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
           {/* Difficulty Buttons */}
-          <div className="flex items-center gap-1 bg-white/[0.03] p-1 rounded-lg border border-white/[0.06] overflow-x-auto">
+          <div className="flex items-center gap-1.5 bg-black/30 p-1 rounded-xl border border-white/[0.06] overflow-x-auto">
+            <span className="text-[11px] font-mono text-slate-500 px-2 uppercase tracking-wider font-semibold">
+              Difficulty:
+            </span>
             {DIFFICULTIES.map((diff) => (
               <button
                 key={diff}
                 onClick={() => setSelectedDifficulty(diff)}
-                className={`px-2.5 sm:px-3 py-1 text-xs font-mono rounded-md transition-all whitespace-nowrap ${
+                className={`px-3 py-1 text-xs font-mono rounded-lg transition-all whitespace-nowrap ${
                   selectedDifficulty === diff
                     ? 'bg-cyan-500 text-slate-950 font-bold shadow-sm'
                     : 'text-slate-400 hover:text-slate-200'
@@ -125,12 +136,15 @@ export default function QuestionLibrary({ onSelectQuestion, setActivePage, solve
           </div>
 
           {/* Solved Status Filter */}
-          <div className="flex items-center gap-1 bg-white/[0.03] p-1 rounded-lg border border-white/[0.06] overflow-x-auto">
+          <div className="flex items-center gap-1.5 bg-black/30 p-1 rounded-xl border border-white/[0.06] overflow-x-auto">
+            <span className="text-[11px] font-mono text-slate-500 px-2 uppercase tracking-wider font-semibold">
+              Status:
+            </span>
             {['All', 'Solved', 'Unsolved'].map((st) => (
               <button
                 key={st}
                 onClick={() => setStatusFilter(st)}
-                className={`px-2.5 sm:px-3 py-1 text-xs font-mono rounded-md transition-all whitespace-nowrap ${
+                className={`px-3 py-1 text-xs font-mono rounded-lg transition-all whitespace-nowrap ${
                   statusFilter === st
                     ? 'bg-cyan-500 text-slate-950 font-bold shadow-sm'
                     : 'text-slate-400 hover:text-slate-200'
@@ -140,27 +154,13 @@ export default function QuestionLibrary({ onSelectQuestion, setActivePage, solve
               </button>
             ))}
           </div>
-
-          {/* Visualizer Status Filter */}
-          <div className="flex items-center gap-1 bg-white/[0.03] p-1 rounded-lg border border-white/[0.06] overflow-x-auto">
-            {['All', 'Visualizer Ready', 'Sandbox Only'].map((vf) => (
-              <button
-                key={vf}
-                onClick={() => setVisFilter(vf)}
-                className={`px-2.5 sm:px-3 py-1 text-xs font-mono rounded-md transition-all whitespace-nowrap ${
-                  visFilter === vf
-                    ? 'bg-cyan-500 text-slate-950 font-bold shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200'
-                }`}
-              >
-                {vf}
-              </button>
-            ))}
-          </div>
         </div>
 
         {/* Topics Filter Row */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 pt-1 scrollbar-thin">
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 pt-1 scrollbar-thin">
+          <span className="text-[11px] font-mono text-slate-500 shrink-0 uppercase tracking-wider font-semibold">
+            Topics:
+          </span>
           {TOPICS.map((topic) => (
             <button
               key={topic}

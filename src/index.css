@@ -34,13 +34,13 @@
   --font-display: 'Plus Jakarta Sans', 'Inter', sans-serif;
 }
 
-* {
+*, ::before, ::after {
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
 }
 
 body {
+  margin: 0;
+  padding: 0;
   background-color: var(--bg-base);
   color: var(--text-primary);
   font-family: var(--font-sans);

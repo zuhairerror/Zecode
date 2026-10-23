@@ -9,7 +9,8 @@ import {
   X,
   User,
   LogOut,
-  ChevronDown
+  ChevronDown,
+  Search
 } from 'lucide-react';
 import ZecodeLogo from './ZecodeLogo';
 
@@ -18,7 +19,8 @@ export default function Navbar({
   setActivePage,
   currentUser,
   onOpenAuth,
-  onLogout
+  onLogout,
+  onOpenSearch
 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
@@ -71,10 +73,23 @@ export default function Navbar({
             })}
           </div>
 
-          {/* Right Status Badge & Auth Trigger */}
+          {/* Right Controls: Search, Status, Auth */}
           <div className="hidden md:flex items-center gap-3">
+            {/* Global Search Button */}
+            <button
+              onClick={onOpenSearch}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] hover:border-cyan-500/40 text-xs text-slate-400 hover:text-slate-200 transition-all font-sans cursor-pointer group"
+              title="Quick Search (Ctrl+K)"
+            >
+              <Search className="w-3.5 h-3.5 text-cyan-400 group-hover:scale-110 transition-transform" />
+              <span>Search algorithms...</span>
+              <kbd className="hidden lg:inline-flex items-center px-1.5 py-0.5 rounded bg-white/[0.06] border border-white/[0.1] text-[10px] font-mono text-slate-400">
+                Ctrl K
+              </kbd>
+            </button>
+
             {/* System Status Pill */}
-            <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/[0.06] text-[11px] font-mono text-slate-300">
+            <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.06] text-[11px] font-mono text-slate-300">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
               <span>Online</span>
             </div>
@@ -135,8 +150,15 @@ export default function Navbar({
             )}
           </div>
 
-          {/* Mobile Hamburger Button */}
+          {/* Mobile Actions: Search, Auth, Menu */}
           <div className="md:hidden flex items-center gap-2">
+            <button
+              onClick={onOpenSearch}
+              className="p-1.5 rounded-lg text-slate-400 hover:text-cyan-400 hover:bg-white/[0.06]"
+              aria-label="Search"
+            >
+              <Search className="w-5 h-5 text-cyan-400" />
+            </button>
             {!currentUser && (
               <button
                 onClick={onOpenAuth}
@@ -158,7 +180,18 @@ export default function Navbar({
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-b border-white/[0.08] bg-[#0A0F1D] px-4 pt-2 pb-4 space-y-1 shadow-2xl animate-fade-in">
+        <div className="md:hidden border-b border-white/[0.08] bg-[#0A0F1D] px-4 pt-2 pb-4 space-y-1.5 shadow-2xl animate-fade-in">
+          {/* Mobile Search Input */}
+          <button
+            onClick={() => {
+              setMobileMenuOpen(false);
+              onOpenSearch();
+            }}
+            className="w-full flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-white/[0.04] border border-white/[0.08] text-xs text-slate-400 mb-2"
+          >
+            <Search className="w-4 h-4 text-cyan-400" />
+            <span>Search algorithms, topics...</span>
+          </button>
           {navLinks.map((link) => {
             const Icon = link.icon;
             const isActive = activePage === link.id;
