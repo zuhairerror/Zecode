@@ -4,7 +4,12 @@ import {
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
-  Info
+  Info,
+  Code2,
+  Copy,
+  Check,
+  Sparkles,
+  Play
 } from 'lucide-react';
 import ArrayVisualizer from '../components/visualizer/ArrayVisualizer';
 import LinkedListVisualizer from '../components/visualizer/LinkedListVisualizer';
@@ -25,10 +30,13 @@ export default function QuestionDetail({
   isSolved,
   onToggleSolved
 }) {
-  const [activeTab, setActiveTab] = useState('description'); // description, complexity, testcases
+  const [activeTab, setActiveTab] = useState('description'); // description, code, complexity, testcases
   const [language, setLanguage] = useState('python');
   const [code, setCode] = useState(question.starterCode[language] || '');
   const [customInputStr, setCustomInputStr] = useState('');
+  const [codeTabLang, setCodeTabLang] = useState('python');
+  const [codeCopied, setCodeCopied] = useState(false);
+  const [loadedToast, setLoadedToast] = useState(false);
 
   // Visualizer Execution State
   const [steps, setSteps] = useState([]);
@@ -186,6 +194,21 @@ export default function QuestionDetail({
     }
   };
 
+  const handleCopyCodeTab = () => {
+    const targetCode = question.starterCode[codeTabLang] || '';
+    navigator.clipboard.writeText(targetCode);
+    setCodeCopied(true);
+    setTimeout(() => setCodeCopied(false), 2000);
+  };
+
+  const handleLoadCodeIntoEditor = () => {
+    const targetCode = question.starterCode[codeTabLang] || '';
+    setCode(targetCode);
+    setLanguage(codeTabLang);
+    setLoadedToast(true);
+    setTimeout(() => setLoadedToast(false), 2500);
+  };
+
   // Mark Problem as Solved with celebration confetti
   const handleSolvedClick = () => {
     const nextState = !isSolved;
@@ -312,7 +335,7 @@ export default function QuestionDetail({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start w-full min-w-0">
         {/* Left Column (5 cols on lg): Problem Context, Specs, Test Cases */}
         <div className="lg:col-span-5 flex flex-col gap-4 w-full min-w-0">
-          {/* Tab Selector */}
+          {/* Tab Selector: Problem, Code, Complexity, Test Cases */}
           <div className="flex items-center gap-1 p-1 bg-white/[0.03] rounded-xl border border-white/[0.08] w-full">
             <button
               onClick={() => setActiveTab('description')}
@@ -323,6 +346,17 @@ export default function QuestionDetail({
               }`}
             >
               Problem
+            </button>
+            <button
+              onClick={() => setActiveTab('code')}
+              className={`flex-1 py-1.5 text-xs font-mono font-medium rounded-lg transition-all flex items-center justify-center gap-1 ${
+                activeTab === 'code'
+                  ? 'bg-cyan-500 text-slate-950 font-bold shadow-sm'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Code2 className="w-3.5 h-3.5" />
+              <span>Code</span>
             </button>
             <button
               onClick={() => setActiveTab('complexity')}
@@ -402,6 +436,138 @@ export default function QuestionDetail({
                   </ul>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Tab 2: Reference Code & Solution */}
+          {activeTab === 'code' && (
+            <div className="surface-card p-5 sm:p-6 flex flex-col gap-4 w-full min-w-0">
+              {/* Header with Language Selector & Action Buttons */}
+              <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-white/[0.06]">
+                {/* Language Pills */}
+                <div className="flex items-center gap-1 bg-black/40 p-1 rounded-lg border border-white/[0.06] overflow-x-auto">
+                  {[
+                    { id: 'python', label: 'Python 3' },
+                    { id: 'cpp', label: 'C++ 17' },
+                    { id: 'java', label: 'Java 17' },
+                    { id: 'c', label: 'C (GCC)' }
+                  ].map((l) => (
+                    <button
+                      key={l.id}
+                      onClick={() => setCodeTabLang(l.id)}
+                      className={`px-2.5 py-1 text-xs font-mono font-medium rounded-md transition-all whitespace-nowrap ${
+                        codeTabLang === l.id
+                          ? 'bg-cyan-500 text-slate-950 font-bold shadow-sm'
+                          : 'text-slate-400 hover:text-slate-200'
+                      }`}
+                    >
+                      {l.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Actions: Copy & Load into Editor */}
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleCopyCodeTab}
+                    className="btn-secondary text-xs py-1.5 px-2.5 flex items-center gap-1.5"
+                    title="Copy Source Code"
+                  >
+                    {codeCopied ? (
+                      <>
+                        <Check className="w-3.5 h-3.5 text-emerald-400" />
+                        <span className="text-emerald-400">Copied!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-3.5 h-3.5 text-slate-400" />
+                        <span>Copy</span>
+                      </>
+                    )}
+                  </button>
+
+                  <button
+                    onClick={handleLoadCodeIntoEditor}
+                    className="btn-primary text-xs py-1.5 px-3 flex items-center gap-1.5"
+                    title="Load this code into the active editor on the right"
+                  >
+                    <Code2 className="w-3.5 h-3.5" />
+                    <span>Load to Editor</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Toast confirmation if loaded */}
+              {loadedToast && (
+                <div className="p-2.5 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-mono flex items-center gap-2 animate-fade-in">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>Code loaded into editor and switched to {codeTabLang.toUpperCase()}!</span>
+                </div>
+              )}
+
+              {/* Code Display Area with Line Numbers */}
+              <div className="rounded-xl border border-white/[0.08] bg-[#070B14] overflow-hidden">
+                <div className="flex items-center justify-between px-3.5 py-2 bg-black/40 border-b border-white/[0.06] text-xs font-mono text-slate-400">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 inline-block"></span>
+                    <span className="text-slate-300 font-medium">{question.title} ({codeTabLang.toUpperCase()})</span>
+                  </div>
+                  <span className="text-[11px] text-slate-500">
+                    {(question.starterCode[codeTabLang] || '').split('\n').length} lines
+                  </span>
+                </div>
+
+                <div className="p-4 overflow-x-auto max-h-[380px] overflow-y-auto font-mono text-xs leading-relaxed text-slate-200">
+                  <pre className="flex gap-4">
+                    {/* Line numbers gutter */}
+                    <span className="select-none text-slate-600 text-right pr-2 border-r border-white/[0.06]">
+                      {(question.starterCode[codeTabLang] || '')
+                        .split('\n')
+                        .map((_, i) => (
+                          <span key={i} className="block leading-relaxed">
+                            {i + 1}
+                          </span>
+                        ))}
+                    </span>
+                    {/* Code lines */}
+                    <code className="text-cyan-100 flex-1 whitespace-pre leading-relaxed">
+                      {question.starterCode[codeTabLang] || '// No code available for this language'}
+                    </code>
+                  </pre>
+                </div>
+              </div>
+
+              {/* Algorithm Logic / Approach Card */}
+              <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06] flex flex-col gap-2">
+                <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-cyan-300 flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>Algorithm Approach & Logic</span>
+                </h4>
+                <p className="text-xs text-slate-300 leading-relaxed font-sans">
+                  {question.description}
+                </p>
+                <div className="flex flex-wrap items-center gap-3 pt-2 text-[11px] font-mono text-slate-400 border-t border-white/[0.04]">
+                  <span>
+                    Time: <strong className="text-emerald-400">{question.complexity?.time?.worst || 'O(N)'}</strong>
+                  </span>
+                  <span>•</span>
+                  <span>
+                    Space: <strong className="text-cyan-400">{question.complexity?.space?.auxiliary || 'O(1)'}</strong>
+                  </span>
+                  <span>•</span>
+                  <button
+                    onClick={() => {
+                      handleLoadCodeIntoEditor();
+                      loadVisualizationTrace();
+                      setIsPlaying(true);
+                    }}
+                    className="text-cyan-400 hover:underline font-semibold ml-auto inline-flex items-center gap-1 cursor-pointer"
+                  >
+                    <Play className="w-3 h-3 fill-current" />
+                    <span>Run & Trace this Solution →</span>
+                  </button>
+                </div>
+              </div>
             </div>
           )}
 

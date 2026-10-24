@@ -39,30 +39,32 @@ export default function MonacoEditorPanel({
     monacoRef.current = monaco;
 
     // Define custom dark navy theme for Monaco
-    monaco.editor.defineTheme('zecode-navy', {
-      base: 'vs-dark',
-      inherit: true,
-      rules: [
-        { background: '080C16', token: '' },
-        { token: 'keyword', foreground: '22D3EE', fontStyle: 'bold' },
-        { token: 'identifier', foreground: 'F8FAFC' },
-        { token: 'string', foreground: 'FCD34D' },
-        { token: 'number', foreground: 'F59E0B' },
-        { token: 'comment', foreground: '64748B', fontStyle: 'italic' },
-        { token: 'delimiter', foreground: '94A3B8' }
-      ],
-      colors: {
-        'editor.background': '#080C16',
-        'editor.foreground': '#F8FAFC',
-        'editor.lineHighlightBackground': '#0F172A',
-        'editorCursor.foreground': '#06B6D4',
-        'editorLineNumber.foreground': '#475569',
-        'editorLineNumber.activeForeground': '#22D3EE',
-        'editor.selectionBackground': '#0891B240'
-      }
-    });
-
-    monaco.editor.setTheme('zecode-navy');
+    try {
+      monaco.editor.defineTheme('zecode-navy', {
+        base: 'vs-dark',
+        inherit: true,
+        rules: [
+          { token: 'keyword', foreground: '22D3EE', fontStyle: 'bold' },
+          { token: 'identifier', foreground: 'F8FAFC' },
+          { token: 'string', foreground: 'FCD34D' },
+          { token: 'number', foreground: 'F59E0B' },
+          { token: 'comment', foreground: '64748B', fontStyle: 'italic' },
+          { token: 'delimiter', foreground: '94A3B8' }
+        ],
+        colors: {
+          'editor.background': '#080C16',
+          'editor.foreground': '#F8FAFC',
+          'editor.lineHighlightBackground': '#0F172A',
+          'editorCursor.foreground': '#06B6D4',
+          'editorLineNumber.foreground': '#475569',
+          'editorLineNumber.activeForeground': '#22D3EE',
+          'editor.selectionBackground': '#0891B240'
+        }
+      });
+      monaco.editor.setTheme('zecode-navy');
+    } catch (err) {
+      console.warn('Monaco theme setup fallback:', err);
+    }
   };
 
   // Synchronize active code line highlighting
@@ -213,17 +215,23 @@ export default function MonacoEditorPanel({
       )}
 
       {/* Monaco Code Editor */}
-      <div className="flex-1 min-h-[350px] relative bg-[#080C16]">
+      <div className="h-[380px] w-full relative bg-[#080C16] overflow-hidden">
         <Editor
-          height="100%"
+          height="380px"
           language={getMonacoLang(language)}
           value={code}
           onChange={(val) => onCodeChange(val || '')}
           onMount={handleEditorDidMount}
           theme="vs-dark"
+          loading={
+            <div className="flex items-center justify-center h-full text-slate-400 font-mono text-xs">
+              <span className="w-4 h-4 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin mr-2.5"></span>
+              <span>Loading Monaco Code Engine...</span>
+            </div>
+          }
           options={{
             fontSize: 13,
-            fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+            fontFamily: "'JetBrains Mono', 'Fira Code', Menlo, Consolas, monospace",
             minimap: { enabled: false },
             scrollBeyondLastLine: false,
             glyphMargin: true,
@@ -231,7 +239,9 @@ export default function MonacoEditorPanel({
             automaticLayout: true,
             tabSize: 4,
             renderLineHighlight: 'all',
-            padding: { top: 12, bottom: 12 }
+            padding: { top: 12, bottom: 12 },
+            cursorBlinking: 'smooth',
+            smoothScrolling: true
           }}
         />
       </div>
