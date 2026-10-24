@@ -24,6 +24,7 @@ export const QUESTIONS_DATA = [
   {
     id: 'two-sum',
     title: 'Two Sum',
+    sheetTag: 'Basic',
     topic: 'Hashing',
     difficulty: 'Easy',
     hasVisualizer: true,
@@ -2337,5 +2338,1600 @@ int trap(int* height, int heightSize) {
 }`
     },
     testCases: [{ input: { array: [0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1] }, expected: 6 }]
+  },
+  {
+    id: 'majority-element-1',
+    title: 'Majority Element-I',
+    sheetTag: 'Core',
+    topic: 'Arrays and Strings',
+    difficulty: 'Medium',
+    hasVisualizer: true,
+    visualizerType: 'array',
+    description: 'Given an array nums of size n, return the majority element.\n\nThe majority element is the element that appears more than ⌊n / 2⌋ times. You may assume that the majority element always exists in the array.\n\nOptimal Algorithm: Boyer-Moore Voting Algorithm achieves O(N) time and O(1) space by maintaining a running candidate and count.',
+    examples: [
+      {
+        input: 'nums = [3, 2, 3]',
+        output: '3',
+        explanation: '3 appears 2 times, which is > 3 / 2 = 1.'
+      },
+      {
+        input: 'nums = [2, 2, 1, 1, 1, 2, 2]',
+        output: '2',
+        explanation: '2 appears 4 times in an array of length 7.'
+      }
+    ],
+    constraints: [
+      'n == nums.length',
+      '1 <= n <= 5 * 10^4',
+      '-10^9 <= nums[i] <= 10^9',
+      'The majority element always exists in the array.'
+    ],
+    defaultInput: {
+      array: [2, 2, 1, 1, 1, 2, 2]
+    },
+    complexity: {
+      time: {
+        best: 'O(N)',
+        average: 'O(N)',
+        worst: 'O(N)',
+        explanation: 'Single linear scan using Boyer-Moore Voting Algorithm.'
+      },
+      space: {
+        auxiliary: 'O(1)',
+        total: 'O(1)',
+        explanation: 'Only uses candidate and count integer variables.'
+      }
+    },
+    starterCode: {
+      python: `def majorityElement(nums):
+    candidate = None
+    count = 0
+    for num in nums:
+        if count == 0:
+            candidate = num
+        count += 1 if num == candidate else -1
+    return candidate
+
+print(majorityElement([2, 2, 1, 1, 1, 2, 2]))`,
+      cpp: `#include <iostream>
+#include <vector>
+using namespace std;
+
+int majorityElement(vector<int>& nums) {
+    int candidate = 0, count = 0;
+    for (int num : nums) {
+        if (count == 0) candidate = num;
+        count += (num == candidate) ? 1 : -1;
+    }
+    return candidate;
+}
+
+int main() {
+    vector<int> nums = {2, 2, 1, 1, 1, 2, 2};
+    cout << majorityElement(nums) << endl;
+    return 0;
+}`,
+      java: `public class Solution {
+    public static int majorityElement(int[] nums) {
+        int candidate = 0, count = 0;
+        for (int num : nums) {
+            if (count == 0) candidate = num;
+            count += (num == candidate) ? 1 : -1;
+        }
+        return candidate;
+    }
+    public static void main(String[] args) {
+        int[] nums = {2, 2, 1, 1, 1, 2, 2};
+        System.out.println(majorityElement(nums));
+    }
+}`,
+      c: `#include <stdio.h>
+
+int majorityElement(int* nums, int numsSize) {
+    int candidate = 0, count = 0;
+    for (int i = 0; i < numsSize; i++) {
+        if (count == 0) candidate = nums[i];
+        count += (nums[i] == candidate) ? 1 : -1;
+    }
+    return candidate;
+}
+
+int main() {
+    int nums[] = {2, 2, 1, 1, 1, 2, 2};
+    printf("%d\\n", majorityElement(nums, 7));
+    return 0;
+}`
+    },
+    testCases: [
+      { input: { array: [2, 2, 1, 1, 1, 2, 2] }, expected: 2 },
+      { input: { array: [3, 2, 3] }, expected: 3 }
+    ]
+  },
+  {
+    id: 'leaders-in-an-array',
+    title: 'Leaders in an Array',
+    sheetTag: 'Core',
+    topic: 'Arrays and Strings',
+    difficulty: 'Easy',
+    hasVisualizer: true,
+    visualizerType: 'array',
+    description: 'Given an array of integers nums, find all the leaders in the array.\n\nAn element is a leader if it is strictly greater than all elements to its right. The rightmost element is always a leader.\n\nOptimal Approach: Scan from right to left while maintaining the maximum element seen so far.',
+    examples: [
+      {
+        input: 'nums = [16, 17, 4, 3, 5, 2]',
+        output: '[17, 5, 2]',
+        explanation: '17 is greater than 4, 3, 5, 2. 5 is greater than 2. 2 is the rightmost element.'
+      },
+      {
+        input: 'nums = [1, 2, 3, 4, 0]',
+        output: '[4, 0]',
+        explanation: '4 and 0 are leaders.'
+      }
+    ],
+    constraints: [
+      '1 <= nums.length <= 10^5',
+      '0 <= nums[i] <= 10^7'
+    ],
+    defaultInput: {
+      array: [16, 17, 4, 3, 5, 2]
+    },
+    complexity: {
+      time: {
+        best: 'O(N)',
+        average: 'O(N)',
+        worst: 'O(N)',
+        explanation: 'Single reverse pass from right to left.'
+      },
+      space: {
+        auxiliary: 'O(1)',
+        total: 'O(N)',
+        explanation: 'Result list to hold leaders; O(1) auxiliary space.'
+      }
+    },
+    starterCode: {
+      python: `def leaders(nums):
+    result = []
+    max_right = float('-inf')
+    for num in reversed(nums):
+        if num > max_right:
+            result.append(num)
+            max_right = num
+    return result[::-1]
+
+print(leaders([16, 17, 4, 3, 5, 2]))`,
+      cpp: `#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+vector<int> leaders(vector<int>& nums) {
+    vector<int> result;
+    int max_right = -1e9;
+    for (int i = nums.size() - 1; i >= 0; --i) {
+        if (nums[i] > max_right) {
+            result.push_back(nums[i]);
+            max_right = nums[i];
+        }
+    }
+    reverse(result.begin(), result.end());
+    return result;
+}
+
+int main() {
+    vector<int> nums = {16, 17, 4, 3, 5, 2};
+    vector<int> res = leaders(nums);
+    for (int x : res) cout << x << " ";
+    cout << endl;
+    return 0;
+}`,
+      java: `import java.util.*;
+
+public class Solution {
+    public static List<Integer> leaders(int[] nums) {
+        List<Integer> result = new ArrayList<>();
+        int maxRight = Integer.MIN_VALUE;
+        for (int i = nums.length - 1; i >= 0; i--) {
+            if (nums[i] > maxRight) {
+                result.add(nums[i]);
+                maxRight = nums[i];
+            }
+        }
+        Collections.reverse(result);
+        return result;
+    }
+    public static void main(String[] args) {
+        int[] nums = {16, 17, 4, 3, 5, 2};
+        System.out.println(leaders(nums));
+    }
+}`,
+      c: `#include <stdio.h>
+
+void leaders(int* nums, int n) {
+    int maxRight = nums[n - 1];
+    printf("Leaders from right: %d ", maxRight);
+    for (int i = n - 2; i >= 0; i--) {
+        if (nums[i] > maxRight) {
+            maxRight = nums[i];
+            printf("%d ", maxRight);
+        }
+    }
+    printf("\\n");
+}
+
+int main() {
+    int nums[] = {16, 17, 4, 3, 5, 2};
+    leaders(nums, 6);
+    return 0;
+}`
+    },
+    testCases: [
+      { input: { array: [16, 17, 4, 3, 5, 2] }, expected: [17, 5, 2] },
+      { input: { array: [1, 2, 3, 4, 0] }, expected: [4, 0] }
+    ]
+  },
+  {
+    id: 'rearrange-array-by-sign',
+    title: 'Rearrange array elements by sign',
+    sheetTag: 'Core',
+    topic: 'Arrays and Strings',
+    difficulty: 'Medium',
+    hasVisualizer: true,
+    visualizerType: 'array',
+    description: 'You are given an array of integers nums of even length consisting of an equal number of positive and negative integers.\n\nRearrange the elements of nums following these rules:\n1. Every consecutive pair of integers have opposite signs.\n2. For all integers with the same sign, the relative order in which they were present in nums is preserved.\n3. The rearranged array begins with a positive integer.\n\nOptimal Approach: Two pointer indexing (pos at 0, 2, 4... and neg at 1, 3, 5...) in a single pass.',
+    examples: [
+      {
+        input: 'nums = [3, 1, -2, -5, 2, -4]',
+        output: '[3, -2, 1, -5, 2, -4]',
+        explanation: 'Positives: [3, 1, 2], Negatives: [-2, -5, -4]. Alternating gives [3, -2, 1, -5, 2, -4].'
+      },
+      {
+        input: 'nums = [-1, 1]',
+        output: '[1, -1]',
+        explanation: 'Starts with positive 1 followed by negative -1.'
+      }
+    ],
+    constraints: [
+      '2 <= nums.length <= 2 * 10^5',
+      'nums.length is even.',
+      '1 <= |nums[i]| <= 10^5',
+      'nums consists of equal number of positive and negative integers.'
+    ],
+    defaultInput: {
+      array: [3, 1, -2, -5, 2, -4]
+    },
+    complexity: {
+      time: {
+        best: 'O(N)',
+        average: 'O(N)',
+        worst: 'O(N)',
+        explanation: 'Single linear pass over the input array.'
+      },
+      space: {
+        auxiliary: 'O(1)',
+        total: 'O(N)',
+        explanation: 'Allocates an answer array of size N.'
+      }
+    },
+    starterCode: {
+      python: `def rearrangeArray(nums):
+    ans = [0] * len(nums)
+    pos, neg = 0, 1
+    for num in nums:
+        if num > 0:
+            ans[pos] = num
+            pos += 2
+        else:
+            ans[neg] = num
+            neg += 2
+    return ans
+
+print(rearrangeArray([3, 1, -2, -5, 2, -4]))`,
+      cpp: `#include <iostream>
+#include <vector>
+using namespace std;
+
+vector<int> rearrangeArray(vector<int>& nums) {
+    int n = nums.size();
+    vector<int> ans(n);
+    int pos = 0, neg = 1;
+    for (int num : nums) {
+        if (num > 0) {
+            ans[pos] = num;
+            pos += 2;
+        } else {
+            ans[neg] = num;
+            neg += 2;
+        }
+    }
+    return ans;
+}
+
+int main() {
+    vector<int> nums = {3, 1, -2, -5, 2, -4};
+    vector<int> res = rearrangeArray(nums);
+    for (int x : res) cout << x << " ";
+    cout << endl;
+    return 0;
+}`,
+      java: `public class Solution {
+    public static int[] rearrangeArray(int[] nums) {
+        int n = nums.length;
+        int[] ans = new int[n];
+        int pos = 0, neg = 1;
+        for (int num : nums) {
+            if (num > 0) {
+                ans[pos] = num;
+                pos += 2;
+            } else {
+                ans[neg] = num;
+                neg += 2;
+            }
+        }
+        return ans;
+    }
+    public static void main(String[] args) {
+        int[] nums = {3, 1, -2, -5, 2, -4};
+        int[] res = rearrangeArray(nums);
+        for (int x : res) System.out.print(x + " ");
+        System.out.println();
+    }
+}`,
+      c: `#include <stdio.h>
+#include <stdlib.h>
+
+int* rearrangeArray(int* nums, int numsSize) {
+    int* ans = (int*)malloc(numsSize * sizeof(int));
+    int pos = 0, neg = 1;
+    for (int i = 0; i < numsSize; i++) {
+        if (nums[i] > 0) {
+            ans[pos] = nums[i];
+            pos += 2;
+        } else {
+            ans[neg] = nums[i];
+            neg += 2;
+        }
+    }
+    return ans;
+}
+
+int main() {
+    int nums[] = {3, 1, -2, -5, 2, -4};
+    int* res = rearrangeArray(nums, 6);
+    for (int i = 0; i < 6; i++) printf("%d ", res[i]);
+    printf("\\n");
+    free(res);
+    return 0;
+}`
+    },
+    testCases: [
+      { input: { array: [3, 1, -2, -5, 2, -4] }, expected: [3, -2, 1, -5, 2, -4] },
+      { input: { array: [-1, 1] }, expected: [1, -1] }
+    ]
+  },
+  {
+    id: 'spiral-matrix',
+    title: 'Print the matrix in spiral manner',
+    sheetTag: 'Core',
+    topic: 'Arrays and Strings',
+    difficulty: 'Medium',
+    hasVisualizer: true,
+    visualizerType: 'grid',
+    description: 'Given an m x n matrix, return all elements of the matrix in clockwise spiral order starting from the top-left cell.\n\nOptimal Approach: Maintain four boundaries (top, bottom, left, right) and traverse along each perimeter while shrinking inward.',
+    examples: [
+      {
+        input: 'matrix = [[1,2,3],[4,5,6],[7,8,9]]',
+        output: '[1, 2, 3, 6, 9, 8, 7, 4, 5]',
+        explanation: 'Spiral path goes right (1,2,3), down (6,9), left (8,7), up (4), right (5).'
+      },
+      {
+        input: 'matrix = [[1,2,3,4],[5,6,7,8],[9,10,11,12]]',
+        output: '[1, 2, 3, 4, 8, 12, 11, 10, 9, 5, 6, 7]',
+        explanation: 'Clockwise outer cycle then inner cycle.'
+      }
+    ],
+    constraints: [
+      'm == matrix.length',
+      'n == matrix[i].length',
+      '1 <= m, n <= 10',
+      '-100 <= matrix[i][j] <= 100'
+    ],
+    defaultInput: {
+      grid: [
+        [1, 2, 3, 4],
+        [5, 6, 7, 8],
+        [9, 10, 11, 12],
+        [13, 14, 15, 16]
+      ]
+    },
+    complexity: {
+      time: {
+        best: 'O(M * N)',
+        average: 'O(M * N)',
+        worst: 'O(M * N)',
+        explanation: 'Every cell in the matrix is visited exactly once.'
+      },
+      space: {
+        auxiliary: 'O(1)',
+        total: 'O(M * N)',
+        explanation: 'Output list of size M*N; O(1) extra space.'
+      }
+    },
+    starterCode: {
+      python: `def spiralOrder(matrix):
+    if not matrix:
+        return []
+    res = []
+    top, bottom = 0, len(matrix) - 1
+    left, right = 0, len(matrix[0]) - 1
+    while top <= bottom and left <= right:
+        for c in range(left, right + 1):
+            res.append(matrix[top][c])
+        top += 1
+        for r in range(top, bottom + 1):
+            res.append(matrix[r][right])
+        right -= 1
+        if top <= bottom:
+            for c in range(right, left - 1, -1):
+                res.append(matrix[bottom][c])
+            bottom -= 1
+        if left <= right:
+            for r in range(bottom, top - 1, -1):
+                res.append(matrix[r][left])
+            left += 1
+    return res
+
+print(spiralOrder([[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, 16]]))`,
+      cpp: `#include <iostream>
+#include <vector>
+using namespace std;
+
+vector<int> spiralOrder(vector<vector<int>>& matrix) {
+    vector<int> res;
+    if (matrix.empty()) return res;
+    int top = 0, bottom = matrix.size() - 1;
+    int left = 0, right = matrix[0].size() - 1;
+    while (top <= bottom && left <= right) {
+        for (int c = left; c <= right; ++c) res.push_back(matrix[top][c]);
+        top++;
+        for (int r = top; r <= bottom; ++r) res.push_back(matrix[r][right]);
+        right--;
+        if (top <= bottom) {
+            for (int c = right; c >= left; --c) res.push_back(matrix[bottom][c]);
+            bottom--;
+        }
+        if (left <= right) {
+            for (int r = bottom; r >= top; --r) res.push_back(matrix[r][left]);
+            left++;
+        }
+    }
+    return res;
+}
+
+int main() {
+    vector<vector<int>> mat = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
+    vector<int> res = spiralOrder(mat);
+    for (int x : res) cout << x << " ";
+    cout << endl;
+    return 0;
+}`,
+      java: `import java.util.*;
+
+public class Solution {
+    public static List<Integer> spiralOrder(int[][] matrix) {
+        List<Integer> res = new ArrayList<>();
+        if (matrix.length == 0) return res;
+        int top = 0, bottom = matrix.length - 1;
+        int left = 0, right = matrix[0].length - 1;
+        while (top <= bottom && left <= right) {
+            for (int c = left; c <= right; c++) res.add(matrix[top][c]);
+            top++;
+            for (int r = top; r <= bottom; r++) res.add(matrix[r][right]);
+            right--;
+            if (top <= bottom) {
+                for (int c = right; c >= left; c--) res.add(matrix[bottom][c]);
+                bottom--;
+            }
+            if (left <= right) {
+                for (int r = bottom; r >= top; r--) res.add(matrix[r][left]);
+                left++;
+            }
+        }
+        return res;
+    }
+    public static void main(String[] args) {
+        int[][] mat = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
+        System.out.println(spiralOrder(mat));
+    }
+}`,
+      c: `#include <stdio.h>
+
+void spiralOrder(int mat[3][3], int m, int n) {
+    int top = 0, bottom = m - 1;
+    int left = 0, right = n - 1;
+    while (top <= bottom && left <= right) {
+        for (int c = left; c <= right; c++) printf("%d ", mat[top][c]);
+        top++;
+        for (int r = top; r <= bottom; r++) printf("%d ", mat[r][right]);
+        right--;
+        if (top <= bottom) {
+            for (int c = right; c >= left; c--) printf("%d ", mat[bottom][c]);
+            bottom--;
+        }
+        if (left <= right) {
+            for (int r = bottom; r >= top; r--) printf("%d ", mat[r][left]);
+            left++;
+        }
+    }
+    printf("\\n");
+}
+
+int main() {
+    int mat[3][3] = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
+    spiralOrder(mat, 3, 3);
+    return 0;
+}`
+    },
+    testCases: [
+      {
+        input: {
+          grid: [
+            [1, 2, 3],
+            [4, 5, 6],
+            [7, 8, 9]
+          ]
+        },
+        expected: [1, 2, 3, 6, 9, 8, 7, 4, 5]
+      }
+    ]
+  },
+  {
+    id: 'pascals-triangle-1',
+    title: 'Pascal\'s Triangle I',
+    sheetTag: 'Core',
+    topic: 'Arrays and Strings',
+    difficulty: 'Easy',
+    hasVisualizer: true,
+    visualizerType: 'array',
+    description: 'Variation 1 of Pascal\'s Triangle:\nGiven row number r and column number c (1-indexed), find the value at position (r, c).\n\nOptimal Approach: The value at position (r, c) is nCr(r - 1, c - 1) = (r - 1)! / ((c - 1)! * (r - c)!). We can compute this in O(c) time and O(1) space using iterative multiplication.',
+    examples: [
+      {
+        input: 'r = 5, c = 3',
+        output: '6',
+        explanation: 'At row 5, the values are [1, 4, 6, 4, 1]. Column 3 has value 6.'
+      },
+      {
+        input: 'r = 4, c = 2',
+        output: '3',
+        explanation: 'At row 4, values are [1, 3, 3, 1]. Column 2 has value 3.'
+      }
+    ],
+    constraints: [
+      '1 <= r <= 30',
+      '1 <= c <= r'
+    ],
+    defaultInput: {
+      array: [5, 3]
+    },
+    complexity: {
+      time: {
+        best: 'O(c)',
+        average: 'O(c)',
+        worst: 'O(c)',
+        explanation: 'Calculates combinations formula iteratively in c steps.'
+      },
+      space: {
+        auxiliary: 'O(1)',
+        total: 'O(1)',
+        explanation: 'Constant additional memory.'
+      }
+    },
+    starterCode: {
+      python: `def pascalElement(r, c):
+    res = 1
+    for i in range(c - 1):
+        res = res * (r - 1 - i) // (i + 1)
+    return res
+
+print(pascalElement(5, 3))`,
+      cpp: `#include <iostream>
+using namespace std;
+
+long long pascalElement(int r, int c) {
+    long long res = 1;
+    for (int i = 0; i < c - 1; ++i) {
+        res = res * (r - 1 - i);
+        res = res / (i + 1);
+    }
+    return res;
+}
+
+int main() {
+    cout << pascalElement(5, 3) << endl;
+    return 0;
+}`,
+      java: `public class Solution {
+    public static long pascalElement(int r, int c) {
+        long res = 1;
+        for (int i = 0; i < c - 1; i++) {
+            res = res * (r - 1 - i);
+            res = res / (i + 1);
+        }
+        return res;
+    }
+    public static void main(String[] args) {
+        System.out.println(pascalElement(5, 3));
+    }
+}`,
+      c: `#include <stdio.h>
+
+long long pascalElement(int r, int c) {
+    long long res = 1;
+    for (int i = 0; i < c - 1; i++) {
+        res = res * (r - 1 - i);
+        res = res / (i + 1);
+    }
+    return res;
+}
+
+int main() {
+    printf("%lld\\n", pascalElement(5, 3));
+    return 0;
+}`
+    },
+    testCases: [
+      { input: { array: [5, 3] }, expected: 6 },
+      { input: { array: [4, 2] }, expected: 3 }
+    ]
+  },
+  {
+    id: 'pascals-triangle-2',
+    title: 'Pascal\'s Triangle II',
+    sheetTag: 'Core',
+    topic: 'Arrays and Strings',
+    difficulty: 'Easy',
+    hasVisualizer: true,
+    visualizerType: 'array',
+    description: 'Variation 2 of Pascal\'s Triangle:\nGiven an integer rowIndex (0-indexed or 1-indexed n), return the entire rowIndex-th row of Pascal\'s triangle.\n\nOptimal Approach: Instead of computing the full triangle, compute each element from the previous one in O(N) time using the property: element[i] = element[i-1] * (rowIndex - i + 1) / i.',
+    examples: [
+      {
+        input: 'rowIndex = 4',
+        output: '[1, 4, 6, 4, 1]',
+        explanation: 'Row 4 of Pascal\'s triangle contains 5 elements.'
+      },
+      {
+        input: 'rowIndex = 3',
+        output: '[1, 3, 3, 1]',
+        explanation: 'Row 3 contains [1, 3, 3, 1].'
+      }
+    ],
+    constraints: [
+      '0 <= rowIndex <= 33'
+    ],
+    defaultInput: {
+      array: [1, 4, 6, 4, 1]
+    },
+    complexity: {
+      time: {
+        best: 'O(N)',
+        average: 'O(N)',
+        worst: 'O(N)',
+        explanation: 'Generates N+1 elements in a single loop.'
+      },
+      space: {
+        auxiliary: 'O(1)',
+        total: 'O(N)',
+        explanation: 'Returns a single row array of size N+1.'
+      }
+    },
+    starterCode: {
+      python: `def getRow(rowIndex):
+    row = [1]
+    ans = 1
+    for i in range(1, rowIndex + 1):
+        ans = ans * (rowIndex - i + 1) // i
+        row.append(ans)
+    return row
+
+print(getRow(4))`,
+      cpp: `#include <iostream>
+#include <vector>
+using namespace std;
+
+vector<int> getRow(int rowIndex) {
+    vector<int> row;
+    long long ans = 1;
+    row.push_back(1);
+    for (int i = 1; i <= rowIndex; ++i) {
+        ans = ans * (rowIndex - i + 1) / i;
+        row.push_back((int)ans);
+    }
+    return row;
+}
+
+int main() {
+    vector<int> r = getRow(4);
+    for (int x : r) cout << x << " ";
+    cout << endl;
+    return 0;
+}`,
+      java: `import java.util.*;
+
+public class Solution {
+    public static List<Integer> getRow(int rowIndex) {
+        List<Integer> row = new ArrayList<>();
+        long ans = 1;
+        row.add(1);
+        for (int i = 1; i <= rowIndex; i++) {
+            ans = ans * (rowIndex - i + 1) / i;
+            row.add((int)ans);
+        }
+        return row;
+    }
+    public static void main(String[] args) {
+        System.out.println(getRow(4));
+    }
+}`,
+      c: `#include <stdio.h>
+
+void printRow(int rowIndex) {
+    long long ans = 1;
+    printf("1 ");
+    for (int i = 1; i <= rowIndex; i++) {
+        ans = ans * (rowIndex - i + 1) / i;
+        printf("%lld ", ans);
+    }
+    printf("\\n");
+}
+
+int main() {
+    printRow(4);
+    return 0;
+}`
+    },
+    testCases: [
+      { input: { array: [4] }, expected: [1, 4, 6, 4, 1] },
+      { input: { array: [3] }, expected: [1, 3, 3, 1] }
+    ]
+  },
+  {
+    id: 'pascals-triangle-3',
+    title: 'Pascal\'s Triangle III',
+    sheetTag: 'Core',
+    topic: 'Arrays and Strings',
+    difficulty: 'Medium',
+    hasVisualizer: true,
+    visualizerType: 'array',
+    description: 'Variation 3 of Pascal\'s Triangle:\nGiven an integer numRows, return the first numRows of Pascal\'s triangle as a 2D array.\n\nOptimal Approach: Each row starts and ends with 1. Every interior element is the sum of the two elements directly above it: triangle[i][j] = triangle[i-1][j-1] + triangle[i-1][j].',
+    examples: [
+      {
+        input: 'numRows = 5',
+        output: '[[1],[1,1],[1,2,1],[1,3,3,1],[1,4,6,4,1]]',
+        explanation: 'Generates the first 5 full rows of the triangle.'
+      },
+      {
+        input: 'numRows = 1',
+        output: '[[1]]',
+        explanation: 'First row is [1].'
+      }
+    ],
+    constraints: [
+      '1 <= numRows <= 30'
+    ],
+    defaultInput: {
+      array: [1, 2, 3, 4, 5]
+    },
+    complexity: {
+      time: {
+        best: 'O(numRows^2)',
+        average: 'O(numRows^2)',
+        worst: 'O(numRows^2)',
+        explanation: 'Computes 1 + 2 + ... + numRows elements = numRows*(numRows+1)/2.'
+      },
+      space: {
+        auxiliary: 'O(1)',
+        total: 'O(numRows^2)',
+        explanation: 'Stores all generated rows.'
+      }
+    },
+    starterCode: {
+      python: `def generate(numRows):
+    triangle = []
+    for i in range(numRows):
+        row = [1] * (i + 1)
+        for j in range(1, i):
+            row[j] = triangle[i - 1][j - 1] + triangle[i - 1][j]
+        triangle.append(row)
+    return triangle
+
+print(generate(5))`,
+      cpp: `#include <iostream>
+#include <vector>
+using namespace std;
+
+vector<vector<int>> generate(int numRows) {
+    vector<vector<int>> triangle;
+    for (int i = 0; i < numRows; ++i) {
+        vector<int> row(i + 1, 1);
+        for (int j = 1; j < i; ++j) {
+            row[j] = triangle[i - 1][j - 1] + triangle[i - 1][j];
+        }
+        triangle.push_back(row);
+    }
+    return triangle;
+}
+
+int main() {
+    vector<vector<int>> tri = generate(5);
+    for (const auto& r : tri) {
+        for (int x : r) cout << x << " ";
+        cout << endl;
+    }
+    return 0;
+}`,
+      java: `import java.util.*;
+
+public class Solution {
+    public static List<List<Integer>> generate(int numRows) {
+        List<List<Integer>> triangle = new ArrayList<>();
+        for (int i = 0; i < numRows; i++) {
+            List<Integer> row = new ArrayList<>();
+            for (int j = 0; j <= i; j++) {
+                if (j == 0 || j == i) row.add(1);
+                else row.add(triangle.get(i - 1).get(j - 1) + triangle.get(i - 1).get(j));
+            }
+            triangle.add(row);
+        }
+        return triangle;
+    }
+    public static void main(String[] args) {
+        System.out.println(generate(5));
+    }
+}`,
+      c: `#include <stdio.h>
+
+void generate(int numRows) {
+    int tri[30][30];
+    for (int i = 0; i < numRows; i++) {
+        for (int j = 0; j <= i; j++) {
+            if (j == 0 || j == i) tri[i][j] = 1;
+            else tri[i][j] = tri[i-1][j-1] + tri[i-1][j];
+            printf("%d ", tri[i][j]);
+        }
+        printf("\\n");
+    }
+}
+
+int main() {
+    generate(5);
+    return 0;
+}`
+    },
+    testCases: [
+      { input: { array: [5] }, expected: [[1], [1, 1], [1, 2, 1], [1, 3, 3, 1], [1, 4, 6, 4, 1]] }
+    ]
+  },
+  {
+    id: 'rotate-matrix-90',
+    title: 'Rotate matrix by 90 degrees',
+    sheetTag: 'Core',
+    topic: 'Arrays and Strings',
+    difficulty: 'Medium',
+    hasVisualizer: true,
+    visualizerType: 'grid',
+    description: 'You are given an n x n 2D matrix representing an image. Rotate the image by 90 degrees clockwise in-place.\n\nOptimal In-Place Algorithm:\n1. Transpose the matrix (swap matrix[i][j] with matrix[j][i]).\n2. Reverse each row of the transposed matrix.',
+    examples: [
+      {
+        input: 'matrix = [[1,2,3],[4,5,6],[7,8,9]]',
+        output: '[[7,4,1],[8,5,2],[9,6,3]]',
+        explanation: 'After 90 degree clockwise rotation, first row becomes last column.'
+      },
+      {
+        input: 'matrix = [[5,1,9,11],[2,4,8,10],[13,3,6,7],[15,14,12,16]]',
+        output: '[[15,13,2,5],[14,3,4,1],[12,6,8,9],[16,7,10,11]]',
+        explanation: 'All rows rotated clockwise in-place.'
+      }
+    ],
+    constraints: [
+      'n == matrix.length == matrix[i].length',
+      '1 <= n <= 20',
+      '-1000 <= matrix[i][j] <= 1000'
+    ],
+    defaultInput: {
+      grid: [
+        [1, 2, 3],
+        [4, 5, 6],
+        [7, 8, 9]
+      ]
+    },
+    complexity: {
+      time: {
+        best: 'O(N^2)',
+        average: 'O(N^2)',
+        worst: 'O(N^2)',
+        explanation: 'Transpose takes N^2 / 2 swaps; reversing rows takes N^2 / 2 swaps.'
+      },
+      space: {
+        auxiliary: 'O(1)',
+        total: 'O(1)',
+        explanation: 'Completely in-place rotation without allocating a new matrix.'
+      }
+    },
+    starterCode: {
+      python: `def rotate(matrix):
+    n = len(matrix)
+    for i in range(n):
+        for j in range(i + 1, n):
+            matrix[i][j], matrix[j][i] = matrix[j][i], matrix[i][j]
+    for i in range(n):
+        matrix[i].reverse()
+    return matrix
+
+print(rotate([[1, 2, 3], [4, 5, 6], [7, 8, 9]]))`,
+      cpp: `#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+void rotate(vector<vector<int>>& matrix) {
+    int n = matrix.size();
+    for (int i = 0; i < n; ++i) {
+        for (int j = i + 1; j < n; ++j) {
+            swap(matrix[i][j], matrix[j][i]);
+        }
+    }
+    for (int i = 0; i < n; ++i) {
+        reverse(matrix[i].begin(), matrix[i].end());
+    }
+}
+
+int main() {
+    vector<vector<int>> mat = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
+    rotate(mat);
+    for (const auto& row : mat) {
+        for (int x : row) cout << x << " ";
+        cout << endl;
+    }
+    return 0;
+}`,
+      java: `public class Solution {
+    public static void rotate(int[][] matrix) {
+        int n = matrix.length;
+        for (int i = 0; i < n; i++) {
+            for (int j = i + 1; j < n; j++) {
+                int temp = matrix[i][j];
+                matrix[i][j] = matrix[j][i];
+                matrix[j][i] = temp;
+            }
+        }
+        for (int i = 0; i < n; i++) {
+            int left = 0, right = n - 1;
+            while (left < right) {
+                int temp = matrix[i][left];
+                matrix[i][left] = matrix[i][right];
+                matrix[i][right] = temp;
+                left++;
+                right--;
+            }
+        }
+    }
+    public static void main(String[] args) {
+        int[][] mat = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
+        rotate(mat);
+        for (int[] row : mat) {
+            for (int x : row) System.out.print(x + " ");
+            System.out.println();
+        }
+    }
+}`,
+      c: `#include <stdio.h>
+
+void rotate(int matrix[3][3], int n) {
+    for (int i = 0; i < n; i++) {
+        for (int j = i + 1; j < n; j++) {
+            int t = matrix[i][j];
+            matrix[i][j] = matrix[j][i];
+            matrix[j][i] = t;
+        }
+    }
+    for (int i = 0; i < n; i++) {
+        int left = 0, right = n - 1;
+        while (left < right) {
+            int t = matrix[i][left];
+            matrix[i][left] = matrix[i][right];
+            matrix[i][right] = t;
+            left++;
+            right--;
+        }
+    }
+}
+
+int main() {
+    int mat[3][3] = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
+    rotate(mat, 3);
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) printf("%d ", mat[i][j]);
+        printf("\\n");
+    }
+    return 0;
+}`
+    },
+    testCases: [
+      {
+        input: {
+          grid: [
+            [1, 2, 3],
+            [4, 5, 6],
+            [7, 8, 9]
+          ]
+        },
+        expected: [
+          [7, 4, 1],
+          [8, 5, 2],
+          [9, 6, 3]
+        ]
+      }
+    ]
+  },
+  {
+    id: 'set-matrix-zeroes',
+    title: 'Set Matrix Zeroes',
+    sheetTag: 'Core',
+    topic: 'Arrays and Strings',
+    difficulty: 'Medium',
+    hasVisualizer: true,
+    visualizerType: 'grid',
+    description: 'Given an m x n integer matrix matrix, if an element is 0, set its entire row and column to 0\'s in-place.\n\nOptimal Approach: Use the first row and first column of the matrix itself as flag markers to record zero states, with a single boolean variable for column 0. This achieves O(1) auxiliary space without allocating extra arrays.',
+    examples: [
+      {
+        input: 'matrix = [[1,1,1],[1,0,1],[1,1,1]]',
+        output: '[[1,0,1],[0,0,0],[1,0,1]]',
+        explanation: 'Cell (1, 1) is 0, so row 1 and column 1 become 0.'
+      },
+      {
+        input: 'matrix = [[0,1,2,0],[3,4,5,2],[1,3,1,5]]',
+        output: '[[0,0,0,0],[0,4,5,0],[0,3,1,0]]',
+        explanation: 'Multiple zeroes set corresponding rows and columns to 0.'
+      }
+    ],
+    constraints: [
+      'm == matrix.length',
+      'n == matrix[0].length',
+      '1 <= m, n <= 20',
+      '-2^31 <= matrix[i][j] <= 2^31 - 1'
+    ],
+    defaultInput: {
+      grid: [
+        [1, 1, 1],
+        [1, 0, 1],
+        [1, 1, 1]
+      ]
+    },
+    complexity: {
+      time: {
+        best: 'O(M * N)',
+        average: 'O(M * N)',
+        worst: 'O(M * N)',
+        explanation: 'Two linear passes across the matrix.'
+      },
+      space: {
+        auxiliary: 'O(1)',
+        total: 'O(1)',
+        explanation: 'Uses first row and first column as markers, requiring O(1) extra space.'
+      }
+    },
+    starterCode: {
+      python: `def setZeroes(matrix):
+    m, n = len(matrix), len(matrix[0])
+    col0 = False
+    for i in range(m):
+        if matrix[i][0] == 0:
+            col0 = True
+        for j in range(1, n):
+            if matrix[i][j] == 0:
+                matrix[i][0] = 0
+                matrix[0][j] = 0
+    for i in range(1, m):
+        for j in range(1, n):
+            if matrix[i][0] == 0 or matrix[0][j] == 0:
+                matrix[i][j] = 0
+    if matrix[0][0] == 0:
+        for j in range(n):
+            matrix[0][j] = 0
+    if col0:
+        for i in range(m):
+            matrix[i][0] = 0
+    return matrix
+
+print(setZeroes([[1, 1, 1], [1, 0, 1], [1, 1, 1]]))`,
+      cpp: `#include <iostream>
+#include <vector>
+using namespace std;
+
+void setZeroes(vector<vector<int>>& matrix) {
+    int m = matrix.size(), n = matrix[0].size();
+    bool col0 = false;
+    for (int i = 0; i < m; ++i) {
+        if (matrix[i][0] == 0) col0 = true;
+        for (int j = 1; j < n; ++j) {
+            if (matrix[i][j] == 0) {
+                matrix[i][0] = 0;
+                matrix[0][j] = 0;
+            }
+        }
+    }
+    for (int i = 1; i < m; ++i) {
+        for (int j = 1; j < n; ++j) {
+            if (matrix[i][0] == 0 || matrix[0][j] == 0) {
+                matrix[i][j] = 0;
+            }
+        }
+    }
+    if (matrix[0][0] == 0) {
+        for (int j = 0; j < n; ++j) matrix[0][j] = 0;
+    }
+    if (col0) {
+        for (int i = 0; i < m; ++i) matrix[i][0] = 0;
+    }
+}
+
+int main() {
+    vector<vector<int>> mat = {{1, 1, 1}, {1, 0, 1}, {1, 1, 1}};
+    setZeroes(mat);
+    for (const auto& r : mat) {
+        for (int x : r) cout << x << " ";
+        cout << endl;
+    }
+    return 0;
+}`,
+      java: `public class Solution {
+    public static void setZeroes(int[][] matrix) {
+        int m = matrix.length, n = matrix[0].length;
+        boolean col0 = false;
+        for (int i = 0; i < m; i++) {
+            if (matrix[i][0] == 0) col0 = true;
+            for (int j = 1; j < n; j++) {
+                if (matrix[i][j] == 0) {
+                    matrix[i][0] = 0;
+                    matrix[0][j] = 0;
+                }
+            }
+        }
+        for (int i = 1; i < m; i++) {
+            for (int j = 1; j < n; j++) {
+                if (matrix[i][0] == 0 || matrix[0][j] == 0) {
+                    matrix[i][j] = 0;
+                }
+            }
+        }
+        if (matrix[0][0] == 0) {
+            for (int j = 0; j < n; j++) matrix[0][j] = 0;
+        }
+        if (col0) {
+            for (int i = 0; i < m; i++) matrix[i][0] = 0;
+        }
+    }
+    public static void main(String[] args) {
+        int[][] mat = {{1, 1, 1}, {1, 0, 1}, {1, 1, 1}};
+        setZeroes(mat);
+        for (int[] r : mat) {
+            for (int x : r) System.out.print(x + " ");
+            System.out.println();
+        }
+    }
+}`,
+      c: `#include <stdio.h>
+#include <stdbool.h>
+
+void setZeroes(int matrix[3][3], int m, int n) {
+    bool col0 = false;
+    for (int i = 0; i < m; i++) {
+        if (matrix[i][0] == 0) col0 = true;
+        for (int j = 1; j < n; j++) {
+            if (matrix[i][j] == 0) {
+                matrix[i][0] = 0;
+                matrix[0][j] = 0;
+            }
+        }
+    }
+    for (int i = 1; i < m; i++) {
+        for (int j = 1; j < n; j++) {
+            if (matrix[i][0] == 0 || matrix[0][j] == 0) matrix[i][j] = 0;
+        }
+    }
+    if (matrix[0][0] == 0) for (int j = 0; j < n; j++) matrix[0][j] = 0;
+    if (col0) for (int i = 0; i < m; i++) matrix[i][0] = 0;
+}
+
+int main() {
+    int mat[3][3] = {{1, 1, 1}, {1, 0, 1}, {1, 1, 1}};
+    setZeroes(mat, 3, 3);
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) printf("%d ", mat[i][j]);
+        printf("\\n");
+    }
+    return 0;
+}`
+    },
+    testCases: [
+      {
+        input: {
+          grid: [
+            [1, 1, 1],
+            [1, 0, 1],
+            [1, 1, 1]
+          ]
+        },
+        expected: [
+          [1, 0, 1],
+          [0, 0, 0],
+          [1, 0, 1]
+        ]
+      }
+    ]
+  },
+  {
+    id: 'three-sum',
+    title: '3 Sum',
+    sheetTag: 'Core',
+    topic: 'Two Pointers and Sliding Window',
+    difficulty: 'Medium',
+    hasVisualizer: true,
+    visualizerType: 'array',
+    description: 'Given an integer array nums, return all the triplets [nums[i], nums[j], nums[k]] such that i != j, i != k, and j != k, and nums[i] + nums[j] + nums[k] == 0.\n\nNotice that the solution set must not contain duplicate triplets.\n\nOptimal Approach: Sort the array, fix the first element i with a loop, then use two pointers (left and right) to find pairs summing to -nums[i] while skipping duplicates.',
+    examples: [
+      {
+        input: 'nums = [-1,0,1,2,-1,-4]',
+        output: '[[-1,-1,2],[-1,0,1]]',
+        explanation: 'Triplets summing to 0 without duplicates.'
+      },
+      {
+        input: 'nums = [0,1,1]',
+        output: '[]',
+        explanation: 'No triplet sums to 0.'
+      },
+      {
+        input: 'nums = [0,0,0]',
+        output: '[[0,0,0]]',
+        explanation: 'Only one unique triplet [0,0,0].'
+      }
+    ],
+    constraints: [
+      '3 <= nums.length <= 3000',
+      '-10^5 <= nums[i] <= 10^5'
+    ],
+    defaultInput: {
+      array: [-1, 0, 1, 2, -1, -4]
+    },
+    complexity: {
+      time: {
+        best: 'O(N^2)',
+        average: 'O(N^2)',
+        worst: 'O(N^2)',
+        explanation: 'Sorting takes O(N log N). Outer loop runs N times, inner two-pointer search runs O(N).'
+      },
+      space: {
+        auxiliary: 'O(1)',
+        total: 'O(N)',
+        explanation: 'Space for sorting and output storage.'
+      }
+    },
+    starterCode: {
+      python: `def threeSum(nums):
+    nums.sort()
+    res = []
+    n = len(nums)
+    for i in range(n - 2):
+        if i > 0 and nums[i] == nums[i - 1]:
+            continue
+        left, right = i + 1, n - 1
+        while left < right:
+            total = nums[i] + nums[left] + nums[right]
+            if total < 0:
+                left += 1
+            elif total > 0:
+                right -= 1
+            else:
+                res.append([nums[i], nums[left], nums[right]])
+                while left < right and nums[left] == nums[left + 1]:
+                    left += 1
+                while left < right and nums[right] == nums[right - 1]:
+                    right -= 1
+                left += 1
+                right -= 1
+    return res
+
+print(threeSum([-1, 0, 1, 2, -1, -4]))`,
+      cpp: `#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+vector<vector<int>> threeSum(vector<int>& nums) {
+    sort(nums.begin(), nums.end());
+    vector<vector<int>> res;
+    int n = nums.size();
+    for (int i = 0; i < n - 2; ++i) {
+        if (i > 0 && nums[i] == nums[i - 1]) continue;
+        int left = i + 1, right = n - 1;
+        while (left < right) {
+            int total = nums[i] + nums[left] + nums[right];
+            if (total < 0) left++;
+            else if (total > 0) right--;
+            else {
+                res.push_back({nums[i], nums[left], nums[right]});
+                while (left < right && nums[left] == nums[left + 1]) left++;
+                while (left < right && nums[right] == nums[right - 1]) right--;
+                left++;
+                right--;
+            }
+        }
+    }
+    return res;
+}
+
+int main() {
+    vector<int> nums = {-1, 0, 1, 2, -1, -4};
+    vector<vector<int>> res = threeSum(nums);
+    for (const auto& triplet : res) {
+        cout << "[" << triplet[0] << "," << triplet[1] << "," << triplet[2] << "] ";
+    }
+    cout << endl;
+    return 0;
+}`,
+      java: `import java.util.*;
+
+public class Solution {
+    public static List<List<Integer>> threeSum(int[] nums) {
+        Arrays.sort(nums);
+        List<List<Integer>> res = new ArrayList<>();
+        int n = nums.length;
+        for (int i = 0; i < n - 2; i++) {
+            if (i > 0 && nums[i] == nums[i - 1]) continue;
+            int left = i + 1, right = n - 1;
+            while (left < right) {
+                int total = nums[i] + nums[left] + nums[right];
+                if (total < 0) left++;
+                else if (total > 0) right--;
+                else {
+                    res.add(Arrays.asList(nums[i], nums[left], nums[right]));
+                    while (left < right && nums[left] == nums[left + 1]) left++;
+                    while (left < right && nums[right] == nums[right - 1]) right--;
+                    left++;
+                    right--;
+                }
+            }
+        }
+        return res;
+    }
+    public static void main(String[] args) {
+        int[] nums = {-1, 0, 1, 2, -1, -4};
+        System.out.println(threeSum(nums));
+    }
+}`,
+      c: `#include <stdio.h>
+#include <stdlib.h>
+
+int compare(const void* a, const void* b) {
+    return (*(int*)a - *(int*)b);
+}
+
+void threeSum(int* nums, int n) {
+    qsort(nums, n, sizeof(int), compare);
+    for (int i = 0; i < n - 2; i++) {
+        if (i > 0 && nums[i] == nums[i - 1]) continue;
+        int left = i + 1, right = n - 1;
+        while (left < right) {
+            int total = nums[i] + nums[left] + nums[right];
+            if (total < 0) left++;
+            else if (total > 0) right--;
+            else {
+                printf("[%d, %d, %d] ", nums[i], nums[left], nums[right]);
+                while (left < right && nums[left] == nums[left + 1]) left++;
+                while (left < right && nums[right] == nums[right - 1]) right--;
+                left++;
+                right--;
+            }
+        }
+    }
+    printf("\\n");
+}
+
+int main() {
+    int nums[] = {-1, 0, 1, 2, -1, -4};
+    threeSum(nums, 6);
+    return 0;
+}`
+    },
+    testCases: [
+      { input: { array: [-1, 0, 1, 2, -1, -4] }, expected: [[-1, -1, 2], [-1, 0, 1]] },
+      { input: { array: [0, 0, 0] }, expected: [[0, 0, 0]] }
+    ]
+  },
+  {
+    id: 'four-sum',
+    title: '4 Sum',
+    sheetTag: 'Pro',
+    topic: 'Two Pointers and Sliding Window',
+    difficulty: 'Hard',
+    hasVisualizer: true,
+    visualizerType: 'array',
+    description: 'Given an array nums of n integers and an integer target, return an array of all unique quadruplets [nums[a], nums[b], nums[c], nums[d]] such that:\n- 0 <= a, b, c, d < n\n- a, b, c, and d are distinct.\n- nums[a] + nums[b] + nums[c] + nums[d] == target.\n\nOptimal Approach: Sort the array, use two nested loops (i and j), then two pointers (left and right) to find matching pairs in O(N^3) time while skipping duplicates.',
+    examples: [
+      {
+        input: 'nums = [1,0,-1,0,-2,2], target = 0',
+        output: '[[-2,-1,1,2],[-2,0,0,2],[-1,0,0,1]]',
+        explanation: 'All unique quadruplets summing to 0.'
+      },
+      {
+        input: 'nums = [2,2,2,2,2], target = 8',
+        output: '[[2,2,2,2]]',
+        explanation: 'Only one unique quadruplet.'
+      }
+    ],
+    constraints: [
+      '1 <= nums.length <= 200',
+      '-10^9 <= nums[i] <= 10^9',
+      '-10^9 <= target <= 10^9'
+    ],
+    defaultInput: {
+      array: [1, 0, -1, 0, -2, 2],
+      target: 0
+    },
+    complexity: {
+      time: {
+        best: 'O(N^3)',
+        average: 'O(N^3)',
+        worst: 'O(N^3)',
+        explanation: 'Two nested loops with a two-pointer pass inside = O(N^3).'
+      },
+      space: {
+        auxiliary: 'O(1)',
+        total: 'O(N)',
+        explanation: 'Space for sorting and output list.'
+      }
+    },
+    starterCode: {
+      python: `def fourSum(nums, target):
+    nums.sort()
+    res = []
+    n = len(nums)
+    for i in range(n - 3):
+        if i > 0 and nums[i] == nums[i - 1]:
+            continue
+        for j in range(i + 1, n - 2):
+            if j > i + 1 and nums[j] == nums[j - 1]:
+                continue
+            left, right = j + 1, n - 1
+            while left < right:
+                total = nums[i] + nums[j] + nums[left] + nums[right]
+                if total < target:
+                    left += 1
+                elif total > target:
+                    right -= 1
+                else:
+                    res.append([nums[i], nums[j], nums[left], nums[right]])
+                    while left < right and nums[left] == nums[left + 1]:
+                        left += 1
+                    while left < right and nums[right] == nums[right - 1]:
+                        right -= 1
+                    left += 1
+                    right -= 1
+    return res
+
+print(fourSum([1, 0, -1, 0, -2, 2], 0))`,
+      cpp: `#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+vector<vector<int>> fourSum(vector<int>& nums, int target) {
+    sort(nums.begin(), nums.end());
+    vector<vector<int>> res;
+    int n = nums.size();
+    for (int i = 0; i < n - 3; ++i) {
+        if (i > 0 && nums[i] == nums[i - 1]) continue;
+        for (int j = i + 1; j < n - 2; ++j) {
+            if (j > i + 1 && nums[j] == nums[j - 1]) continue;
+            int left = j + 1, right = n - 1;
+            while (left < right) {
+                long long total = (long long)nums[i] + nums[j] + nums[left] + nums[right];
+                if (total < target) left++;
+                else if (total > target) right--;
+                else {
+                    res.push_back({nums[i], nums[j], nums[left], nums[right]});
+                    while (left < right && nums[left] == nums[left + 1]) left++;
+                    while (left < right && nums[right] == nums[right - 1]) right--;
+                    left++;
+                    right--;
+                }
+            }
+        }
+    }
+    return res;
+}
+
+int main() {
+    vector<int> nums = {1, 0, -1, 0, -2, 2};
+    vector<vector<int>> res = fourSum(nums, 0);
+    for (const auto& q : res) {
+        cout << "[" << q[0] << "," << q[1] << "," << q[2] << "," << q[3] << "] ";
+    }
+    cout << endl;
+    return 0;
+}`,
+      java: `import java.util.*;
+
+public class Solution {
+    public static List<List<Integer>> fourSum(int[] nums, int target) {
+        Arrays.sort(nums);
+        List<List<Integer>> res = new ArrayList<>();
+        int n = nums.length;
+        for (int i = 0; i < n - 3; i++) {
+            if (i > 0 && nums[i] == nums[i - 1]) continue;
+            for (int j = i + 1; j < n - 2; j++) {
+                if (j > i + 1 && nums[j] == nums[j - 1]) continue;
+                int left = j + 1, right = n - 1;
+                while (left < right) {
+                    long total = (long)nums[i] + nums[j] + nums[left] + nums[right];
+                    if (total < target) left++;
+                    else if (total > target) right--;
+                    else {
+                        res.add(Arrays.asList(nums[i], nums[j], nums[left], nums[right]));
+                        while (left < right && nums[left] == nums[left + 1]) left++;
+                        while (left < right && nums[right] == nums[right - 1]) right--;
+                        left++;
+                        right--;
+                    }
+                }
+            }
+        }
+        return res;
+    }
+    public static void main(String[] args) {
+        int[] nums = {1, 0, -1, 0, -2, 2};
+        System.out.println(fourSum(nums, 0));
+    }
+}`,
+      c: `#include <stdio.h>
+#include <stdlib.h>
+
+int compare(const void* a, const void* b) {
+    return (*(int*)a - *(int*)b);
+}
+
+void fourSum(int* nums, int n, int target) {
+    qsort(nums, n, sizeof(int), compare);
+    for (int i = 0; i < n - 3; i++) {
+        if (i > 0 && nums[i] == nums[i - 1]) continue;
+        for (int j = i + 1; j < n - 2; j++) {
+            if (j > i + 1 && nums[j] == nums[j - 1]) continue;
+            int left = j + 1, right = n - 1;
+            while (left < right) {
+                long long total = (long long)nums[i] + nums[j] + nums[left] + nums[right];
+                if (total < target) left++;
+                else if (total > target) right--;
+                else {
+                    printf("[%d,%d,%d,%d] ", nums[i], nums[j], nums[left], nums[right]);
+                    while (left < right && nums[left] == nums[left + 1]) left++;
+                    while (left < right && nums[right] == nums[right - 1]) right--;
+                    left++;
+                    right--;
+                }
+            }
+        }
+    }
+    printf("\\n");
+}
+
+int main() {
+    int nums[] = {1, 0, -1, 0, -2, 2};
+    fourSum(nums, 6, 0);
+    return 0;
+}`
+    },
+    testCases: [
+      { input: { array: [1, 0, -1, 0, -2, 2], target: 0 }, expected: [[-2, -1, 1, 2], [-2, 0, 0, 2], [-1, 0, 0, 1]] }
+    ]
   }
 ];
+

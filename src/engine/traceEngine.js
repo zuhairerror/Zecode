@@ -1479,6 +1479,701 @@ export function generateFloodFillTrace(
   return steps;
 }
 
+// 17. Majority Element Trace Generator (Boyer-Moore Voting)
+export function generateMajorityElementTrace(initialNums = [2, 2, 1, 1, 1, 2, 2]) {
+  const steps = [];
+  const nums = [...initialNums];
+  let candidate = null;
+  let count = 0;
+
+  steps.push({
+    stepIndex: 0,
+    action: 'init',
+    description: 'Boyer-Moore Voting Algorithm: Initialize candidate = None, count = 0.',
+    codeLine: 2,
+    highlightedIndices: [],
+    pointers: {},
+    variables: { candidate: 'None', count: 0 },
+    data: [...nums],
+    visualizerType: 'array',
+    status: 'active'
+  });
+
+  for (let i = 0; i < nums.length; i++) {
+    const num = nums[i];
+
+    if (count === 0) {
+      candidate = num;
+      steps.push({
+        stepIndex: steps.length,
+        action: 'new_candidate',
+        description: `Count is 0! Set new candidate = nums[i = ${i}] (${num}).`,
+        codeLine: 6,
+        highlightedIndices: [i],
+        pointers: { i },
+        variables: { i, num, candidate, count },
+        data: [...nums],
+        visualizerType: 'array',
+        status: 'active'
+      });
+    }
+
+    const matched = num === candidate;
+    count += matched ? 1 : -1;
+
+    steps.push({
+      stepIndex: steps.length,
+      action: matched ? 'vote_up' : 'vote_down',
+      description: matched
+        ? `nums[${i}] = ${num} matches candidate (${candidate}). Increment count to ${count}.`
+        : `nums[${i}] = ${num} differs from candidate (${candidate}). Cancel out vote: count decreases to ${count}.`,
+      codeLine: 7,
+      highlightedIndices: [i],
+      pointers: { i },
+      variables: { i, num, candidate, count, status: matched ? 'Match (+1)' : 'Diff (-1)' },
+      data: [...nums],
+      visualizerType: 'array',
+      status: 'active'
+    });
+  }
+
+  steps.push({
+    stepIndex: steps.length,
+    action: 'finish',
+    description: `Linear scan complete! Majority element confirmed: ${candidate} (count: ${count}).`,
+    codeLine: 8,
+    highlightedIndices: nums.map((v, idx) => (v === candidate ? idx : null)).filter((v) => v !== null),
+    pointers: {},
+    variables: { majorityElement: candidate },
+    data: [...nums],
+    visualizerType: 'array',
+    status: 'success'
+  });
+
+  return steps;
+}
+
+// 18. Leaders in an Array Trace Generator
+export function generateLeadersTrace(initialNums = [16, 17, 4, 3, 5, 2]) {
+  const steps = [];
+  const nums = [...initialNums];
+  const leaders = [];
+  let maxRight = -Infinity;
+
+  steps.push({
+    stepIndex: 0,
+    action: 'init',
+    description: 'Scanning from right to left. Rightmost element is always a leader. Initial maxRight = -Infinity.',
+    codeLine: 3,
+    highlightedIndices: [],
+    pointers: {},
+    variables: { maxRight: '-Infinity', leaders: '[]' },
+    data: [...nums],
+    visualizerType: 'array',
+    status: 'active'
+  });
+
+  for (let i = nums.length - 1; i >= 0; i--) {
+    const val = nums[i];
+    const isLeader = val > maxRight;
+
+    steps.push({
+      stepIndex: steps.length,
+      action: 'inspect',
+      description: `Checking index ${i} (value ${val}) against current maxRight (${maxRight === -Infinity ? 'None' : maxRight}).`,
+      codeLine: 5,
+      highlightedIndices: [i],
+      pointers: { current: i },
+      variables: { i, val, maxRight: maxRight === -Infinity ? 'None' : maxRight },
+      data: [...nums],
+      visualizerType: 'array',
+      status: 'active'
+    });
+
+    if (isLeader) {
+      leaders.push(val);
+      maxRight = val;
+      steps.push({
+        stepIndex: steps.length,
+        action: 'found_leader',
+        description: `Found leader! ${val} > previous maxRight. Updated maxRight = ${maxRight}.`,
+        codeLine: 6,
+        highlightedIndices: [i],
+        pointers: { leader: i },
+        variables: { leader: val, maxRight, leadersCount: leaders.length },
+        data: [...nums],
+        visualizerType: 'array',
+        status: 'success'
+      });
+    }
+  }
+
+  steps.push({
+    stepIndex: steps.length,
+    action: 'finish',
+    description: `Scan complete! All leaders found (reversed order): [${leaders.reverse().join(', ')}].`,
+    codeLine: 8,
+    highlightedIndices: nums.map((v, idx) => (leaders.includes(v) ? idx : null)).filter((v) => v !== null),
+    pointers: {},
+    variables: { leaders: `[${leaders.join(', ')}]` },
+    data: [...nums],
+    visualizerType: 'array',
+    status: 'success'
+  });
+
+  return steps;
+}
+
+// 19. Rearrange Array Elements by Sign Trace Generator
+export function generateRearrangeBySignTrace(initialNums = [3, 1, -2, -5, 2, -4]) {
+  const steps = [];
+  const nums = [...initialNums];
+  const ans = new Array(nums.length).fill(0);
+  let pos = 0;
+  let neg = 1;
+
+  steps.push({
+    stepIndex: 0,
+    action: 'init',
+    description: 'Initialize pos pointer at even index 0, neg pointer at odd index 1.',
+    codeLine: 3,
+    highlightedIndices: [],
+    pointers: { pos: 0, neg: 1 },
+    variables: { pos: 0, neg: 1 },
+    data: [...nums],
+    visualizerType: 'array',
+    status: 'active'
+  });
+
+  for (let i = 0; i < nums.length; i++) {
+    const val = nums[i];
+    const isPos = val > 0;
+    const targetIdx = isPos ? pos : neg;
+    ans[targetIdx] = val;
+
+    steps.push({
+      stepIndex: steps.length,
+      action: isPos ? 'place_pos' : 'place_neg',
+      description: isPos
+        ? `Element ${val} > 0: place at ans[pos = ${pos}]. Increment pos by 2.`
+        : `Element ${val} < 0: place at ans[neg = ${neg}]. Increment neg by 2.`,
+      codeLine: isPos ? 6 : 9,
+      highlightedIndices: [i],
+      pointers: { current: i, target: targetIdx },
+      variables: { currentVal: val, targetSlot: targetIdx, nextPos: isPos ? pos + 2 : pos, nextNeg: isPos ? neg : neg + 2 },
+      data: [...ans],
+      visualizerType: 'array',
+      status: 'active'
+    });
+
+    if (isPos) pos += 2;
+    else neg += 2;
+  }
+
+  steps.push({
+    stepIndex: steps.length,
+    action: 'finish',
+    description: `Rearranged complete! Alternating positive and negative array: [${ans.join(', ')}].`,
+    codeLine: 11,
+    highlightedIndices: [],
+    pointers: {},
+    variables: { result: `[${ans.join(', ')}]` },
+    data: [...ans],
+    visualizerType: 'array',
+    status: 'success'
+  });
+
+  return steps;
+}
+
+// 20. Spiral Matrix Trace Generator
+export function generateSpiralMatrixTrace(initialGrid = null) {
+  const grid = initialGrid || [
+    [1, 2, 3, 4],
+    [5, 6, 7, 8],
+    [9, 10, 11, 12],
+    [13, 14, 15, 16]
+  ];
+  const steps = [];
+  const m = grid.length;
+  const n = grid[0].length;
+  let top = 0, bottom = m - 1;
+  let left = 0, right = n - 1;
+  const visited = [];
+  const res = [];
+
+  steps.push({
+    stepIndex: 0,
+    action: 'init',
+    description: `Spiral Matrix: Boundaries initialized - top = ${top}, bottom = ${bottom}, left = ${left}, right = ${right}.`,
+    codeLine: 4,
+    activeCell: { r: 0, c: 0 },
+    visitedCells: [],
+    gridTitle: 'Spiral Matrix (Clockwise Traversal)',
+    variables: { top, bottom, left, right, collected: 0 },
+    data: clone(grid),
+    visualizerType: 'grid',
+    status: 'active'
+  });
+
+  while (top <= bottom && left <= right) {
+    // 1. Move Right: top row from left to right
+    for (let c = left; c <= right; c++) {
+      res.push(grid[top][c]);
+      visited.push({ r: top, c });
+      steps.push({
+        stepIndex: steps.length,
+        action: 'move_right',
+        description: `Traverse Right across top row ${top}: cell (${top}, ${c}) = ${grid[top][c]}.`,
+        codeLine: 7,
+        activeCell: { r: top, c },
+        visitedCells: [...visited],
+        gridTitle: 'Spiral Matrix (Right Traversal)',
+        variables: { r: top, c, value: grid[top][c], count: res.length },
+        data: clone(grid),
+        visualizerType: 'grid',
+        status: 'active'
+      });
+    }
+    top++;
+
+    // 2. Move Down: right col from top to bottom
+    for (let r = top; r <= bottom; r++) {
+      res.push(grid[r][right]);
+      visited.push({ r, c: right });
+      steps.push({
+        stepIndex: steps.length,
+        action: 'move_down',
+        description: `Traverse Down along right column ${right}: cell (${r}, ${right}) = ${grid[r][right]}.`,
+        codeLine: 10,
+        activeCell: { r, c: right },
+        visitedCells: [...visited],
+        gridTitle: 'Spiral Matrix (Down Traversal)',
+        variables: { r, c: right, value: grid[r][right], count: res.length },
+        data: clone(grid),
+        visualizerType: 'grid',
+        status: 'active'
+      });
+    }
+    right--;
+
+    // 3. Move Left: bottom row from right to left
+    if (top <= bottom) {
+      for (let c = right; c >= left; c--) {
+        res.push(grid[bottom][c]);
+        visited.push({ r: bottom, c });
+        steps.push({
+          stepIndex: steps.length,
+          action: 'move_left',
+          description: `Traverse Left across bottom row ${bottom}: cell (${bottom}, ${c}) = ${grid[bottom][c]}.`,
+          codeLine: 14,
+          activeCell: { r: bottom, c },
+          visitedCells: [...visited],
+          gridTitle: 'Spiral Matrix (Left Traversal)',
+          variables: { r: bottom, c, value: grid[bottom][c], count: res.length },
+          data: clone(grid),
+          visualizerType: 'grid',
+          status: 'active'
+        });
+      }
+      bottom--;
+    }
+
+    // 4. Move Up: left col from bottom to top
+    if (left <= right) {
+      for (let r = bottom; r >= top; r--) {
+        res.push(grid[r][left]);
+        visited.push({ r, c: left });
+        steps.push({
+          stepIndex: steps.length,
+          action: 'move_up',
+          description: `Traverse Up along left column ${left}: cell (${r}, ${left}) = ${grid[r][left]}.`,
+          codeLine: 18,
+          activeCell: { r, c: left },
+          visitedCells: [...visited],
+          gridTitle: 'Spiral Matrix (Up Traversal)',
+          variables: { r, c: left, value: grid[r][left], count: res.length },
+          data: clone(grid),
+          visualizerType: 'grid',
+          status: 'active'
+        });
+      }
+      left++;
+    }
+  }
+
+  steps.push({
+    stepIndex: steps.length,
+    action: 'finish',
+    description: `Spiral traversal complete! Output sequence: [${res.join(', ')}].`,
+    codeLine: 20,
+    activeCell: null,
+    visitedCells: [...visited],
+    gridTitle: 'Spiral Matrix Complete',
+    variables: { totalVisited: res.length, result: `[${res.join(', ')}]` },
+    data: clone(grid),
+    visualizerType: 'grid',
+    status: 'success'
+  });
+
+  return steps;
+}
+
+// 21. Rotate Matrix 90 Degrees Trace Generator
+export function generateRotateMatrixTrace(initialGrid = null) {
+  const grid = clone(initialGrid || [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+  ]);
+  const steps = [];
+  const n = grid.length;
+
+  steps.push({
+    stepIndex: 0,
+    action: 'init',
+    description: 'Rotate Image by 90° Clockwise in-place: Step 1 is Transpose (swap grid[i][j] with grid[j][i]).',
+    codeLine: 2,
+    activeCell: { r: 0, c: 0 },
+    visitedCells: [],
+    gridTitle: 'Step 1: Matrix Transposition',
+    variables: { stage: 'Transpose', n },
+    data: clone(grid),
+    visualizerType: 'grid',
+    status: 'active'
+  });
+
+  // Step 1: Transpose
+  for (let i = 0; i < n; i++) {
+    for (let j = i + 1; j < n; j++) {
+      const temp = grid[i][j];
+      grid[i][j] = grid[j][i];
+      grid[j][i] = temp;
+
+      steps.push({
+        stepIndex: steps.length,
+        action: 'transpose_swap',
+        description: `Swap cell (${i}, ${j}) [${temp}] with cell (${j}, ${i}) [${grid[i][j]}].`,
+        codeLine: 5,
+        activeCell: { r: i, c: j },
+        visitedCells: [{ r: i, c: j }, { r: j, c: i }],
+        gridTitle: 'Transposing Matrix Elements',
+        variables: { swapA: `(${i},${j})`, swapB: `(${j},${i})`, valueA: grid[i][j], valueB: grid[j][i] },
+        data: clone(grid),
+        visualizerType: 'grid',
+        status: 'active'
+      });
+    }
+  }
+
+  // Step 2: Reverse each row
+  for (let i = 0; i < n; i++) {
+    grid[i].reverse();
+    steps.push({
+      stepIndex: steps.length,
+      action: 'reverse_row',
+      description: `Reversing row ${i} to complete 90° clockwise rotation: [${grid[i].join(', ')}].`,
+      codeLine: 7,
+      activeCell: { r: i, c: 0 },
+      visitedCells: grid[i].map((_, c) => ({ r: i, c })),
+      gridTitle: 'Step 2: Reversing Rows',
+      variables: { reversedRow: i, rowContent: `[${grid[i].join(', ')}]` },
+      data: clone(grid),
+      visualizerType: 'grid',
+      status: 'active'
+    });
+  }
+
+  steps.push({
+    stepIndex: steps.length,
+    action: 'finish',
+    description: 'Matrix rotated 90° clockwise in-place successfully!',
+    codeLine: 8,
+    activeCell: null,
+    visitedCells: [],
+    gridTitle: 'Rotated 90° Matrix Complete',
+    variables: { status: 'Rotated' },
+    data: clone(grid),
+    visualizerType: 'grid',
+    status: 'success'
+  });
+
+  return steps;
+}
+
+// 22. Set Matrix Zeroes Trace Generator
+export function generateSetMatrixZeroesTrace(initialGrid = null) {
+  const grid = clone(initialGrid || [
+    [1, 1, 1],
+    [1, 0, 1],
+    [1, 1, 1]
+  ]);
+  const steps = [];
+  const m = grid.length;
+  const n = grid[0].length;
+  const zeroRows = new Set();
+  const zeroCols = new Set();
+
+  steps.push({
+    stepIndex: 0,
+    action: 'init',
+    description: 'Scan matrix to find all cells with value 0.',
+    codeLine: 4,
+    activeCell: { r: 0, c: 0 },
+    visitedCells: [],
+    gridTitle: 'Scanning for Zeroes',
+    variables: { m, n },
+    data: clone(grid),
+    visualizerType: 'grid',
+    status: 'active'
+  });
+
+  for (let i = 0; i < m; i++) {
+    for (let j = 0; j < n; j++) {
+      if (grid[i][j] === 0) {
+        zeroRows.add(i);
+        zeroCols.add(j);
+        steps.push({
+          stepIndex: steps.length,
+          action: 'found_zero',
+          description: `Found 0 at cell (${i}, ${j}). Flag row ${i} and column ${j} to be zeroed.`,
+          codeLine: 6,
+          activeCell: { r: i, c: j },
+          visitedCells: [{ r: i, c: j }],
+          gridTitle: 'Found Zero at Cell',
+          variables: { zeroRow: i, zeroCol: j },
+          data: clone(grid),
+          visualizerType: 'grid',
+          status: 'active'
+        });
+      }
+    }
+  }
+
+  // Set rows to zero
+  for (const r of zeroRows) {
+    for (let c = 0; c < n; c++) grid[r][c] = 0;
+    steps.push({
+      stepIndex: steps.length,
+      action: 'zero_row',
+      description: `Zero out entire row ${r}.`,
+      codeLine: 12,
+      activeCell: { r, c: 0 },
+      visitedCells: Array.from({ length: n }, (_, c) => ({ r, c })),
+      gridTitle: `Zeroing Row ${r}`,
+      variables: { zeroedRow: r },
+      data: clone(grid),
+      visualizerType: 'grid',
+      status: 'active'
+    });
+  }
+
+  // Set cols to zero
+  for (const c of zeroCols) {
+    for (let r = 0; r < m; r++) grid[r][c] = 0;
+    steps.push({
+      stepIndex: steps.length,
+      action: 'zero_col',
+      description: `Zero out entire column ${c}.`,
+      codeLine: 16,
+      activeCell: { r: 0, c },
+      visitedCells: Array.from({ length: m }, (_, r) => ({ r, c })),
+      gridTitle: `Zeroing Column ${c}`,
+      variables: { zeroedCol: c },
+      data: clone(grid),
+      visualizerType: 'grid',
+      status: 'active'
+    });
+  }
+
+  steps.push({
+    stepIndex: steps.length,
+    action: 'finish',
+    description: 'Set Matrix Zeroes complete!',
+    codeLine: 18,
+    activeCell: null,
+    visitedCells: [],
+    gridTitle: 'Matrix Zeroing Complete',
+    variables: { zeroRowsCount: zeroRows.size, zeroColsCount: zeroCols.size },
+    data: clone(grid),
+    visualizerType: 'grid',
+    status: 'success'
+  });
+
+  return steps;
+}
+
+// 23. 3 Sum Trace Generator
+export function generateThreeSumTrace(initialNums = [-1, 0, 1, 2, -1, -4]) {
+  const steps = [];
+  const nums = [...initialNums].sort((a, b) => a - b);
+  const triplets = [];
+  const n = nums.length;
+
+  steps.push({
+    stepIndex: 0,
+    action: 'sort',
+    description: `Sort the array in ascending order: [${nums.join(', ')}].`,
+    codeLine: 2,
+    highlightedIndices: [],
+    pointers: {},
+    variables: { sortedArray: `[${nums.join(', ')}]` },
+    data: [...nums],
+    visualizerType: 'array',
+    status: 'active'
+  });
+
+  for (let i = 0; i < n - 2; i++) {
+    if (i > 0 && nums[i] === nums[i - 1]) continue;
+    let left = i + 1;
+    let right = n - 1;
+
+    while (left < right) {
+      const sum = nums[i] + nums[left] + nums[right];
+
+      steps.push({
+        stepIndex: steps.length,
+        action: 'check',
+        description: `Fix i=${i} (${nums[i]}), test left=${left} (${nums[left]}), right=${right} (${nums[right]}): Sum = ${sum}.`,
+        codeLine: 9,
+        highlightedIndices: [i, left, right],
+        pointers: { i, left, right },
+        variables: { i, left, right, sum, target: 0 },
+        data: [...nums],
+        visualizerType: 'array',
+        status: 'active'
+      });
+
+      if (sum < 0) {
+        left++;
+      } else if (sum > 0) {
+        right--;
+      } else {
+        triplets.push([nums[i], nums[left], nums[right]]);
+        steps.push({
+          stepIndex: steps.length,
+          action: 'found',
+          description: `Found triplet summing to 0: [${nums[i]}, ${nums[left]}, ${nums[right]}]!`,
+          codeLine: 14,
+          highlightedIndices: [i, left, right],
+          matchedIndices: [i, left, right],
+          pointers: { i, left, right },
+          variables: { foundTriplet: `[${nums[i]}, ${nums[left]}, ${nums[right]}]`, totalTriplets: triplets.length },
+          data: [...nums],
+          visualizerType: 'array',
+          status: 'success'
+        });
+        while (left < right && nums[left] === nums[left + 1]) left++;
+        while (left < right && nums[right] === nums[right - 1]) right--;
+        left++;
+        right--;
+      }
+    }
+  }
+
+  steps.push({
+    stepIndex: steps.length,
+    action: 'finish',
+    description: `3 Sum search complete. Found ${triplets.length} unique triplets: ${JSON.stringify(triplets)}.`,
+    codeLine: 20,
+    highlightedIndices: [],
+    pointers: {},
+    variables: { triplets: JSON.stringify(triplets) },
+    data: [...nums],
+    visualizerType: 'array',
+    status: 'success'
+  });
+
+  return steps;
+}
+
+// 24. 4 Sum Trace Generator
+export function generateFourSumTrace(initialNums = [1, 0, -1, 0, -2, 2], target = 0) {
+  const steps = [];
+  const nums = [...initialNums].sort((a, b) => a - b);
+  const quads = [];
+  const n = nums.length;
+
+  steps.push({
+    stepIndex: 0,
+    action: 'sort',
+    description: `Sort array: [${nums.join(', ')}]. Searching for quadruplets summing to target = ${target}.`,
+    codeLine: 2,
+    highlightedIndices: [],
+    pointers: {},
+    variables: { target, sorted: `[${nums.join(', ')}]` },
+    data: [...nums],
+    visualizerType: 'array',
+    status: 'active'
+  });
+
+  for (let i = 0; i < n - 3; i++) {
+    if (i > 0 && nums[i] === nums[i - 1]) continue;
+    for (let j = i + 1; j < n - 2; j++) {
+      if (j > i + 1 && nums[j] === nums[j - 1]) continue;
+      let left = j + 1;
+      let right = n - 1;
+
+      while (left < right) {
+        const sum = nums[i] + nums[j] + nums[left] + nums[right];
+
+        steps.push({
+          stepIndex: steps.length,
+          action: 'check',
+          description: `Fix i=${i} (${nums[i]}), j=${j} (${nums[j]}), left=${left} (${nums[left]}), right=${right} (${nums[right]}): Sum = ${sum}.`,
+          codeLine: 12,
+          highlightedIndices: [i, j, left, right],
+          pointers: { i, j, left, right },
+          variables: { i, j, left, right, sum, target },
+          data: [...nums],
+          visualizerType: 'array',
+          status: 'active'
+        });
+
+        if (sum < target) {
+          left++;
+        } else if (sum > target) {
+          right--;
+        } else {
+          quads.push([nums[i], nums[j], nums[left], nums[right]]);
+          steps.push({
+            stepIndex: steps.length,
+            action: 'found',
+            description: `Found quadruplet summing to ${target}: [${nums[i]}, ${nums[j]}, ${nums[left]}, ${nums[right]}]!`,
+            codeLine: 18,
+            highlightedIndices: [i, j, left, right],
+            matchedIndices: [i, j, left, right],
+            pointers: { i, j, left, right },
+            variables: { quadruplet: `[${nums[i]}, ${nums[j]}, ${nums[left]}, ${nums[right]}]`, totalFound: quads.length },
+            data: [...nums],
+            visualizerType: 'array',
+            status: 'success'
+          });
+          while (left < right && nums[left] === nums[left + 1]) left++;
+          while (left < right && nums[right] === nums[right - 1]) right--;
+          left++;
+          right--;
+        }
+      }
+    }
+  }
+
+  steps.push({
+    stepIndex: steps.length,
+    action: 'finish',
+    description: `4 Sum complete. Found ${quads.length} unique quadruplets.`,
+    codeLine: 24,
+    highlightedIndices: [],
+    pointers: {},
+    variables: { quadruplets: JSON.stringify(quads) },
+    data: [...nums],
+    visualizerType: 'array',
+    status: 'success'
+  });
+
+  return steps;
+}
+
 // Master Dispatcher for Algorithm Traces
 export function getAlgorithmTrace(questionId, customInput = null) {
   switch (questionId) {
@@ -1486,6 +2181,58 @@ export function getAlgorithmTrace(questionId, customInput = null) {
       const arr = customInput?.array || [2, 7, 11, 15];
       const target = customInput?.target !== undefined ? customInput.target : 9;
       return generateTwoSumTrace(arr, target);
+    }
+    case 'majority-element-1': {
+      const arr = customInput?.array || [2, 2, 1, 1, 1, 2, 2];
+      return generateMajorityElementTrace(arr);
+    }
+    case 'leaders-in-an-array': {
+      const arr = customInput?.array || [16, 17, 4, 3, 5, 2];
+      return generateLeadersTrace(arr);
+    }
+    case 'rearrange-array-by-sign': {
+      const arr = customInput?.array || [3, 1, -2, -5, 2, -4];
+      return generateRearrangeBySignTrace(arr);
+    }
+    case 'spiral-matrix': {
+      const grid = customInput?.grid || [
+        [1, 2, 3, 4],
+        [5, 6, 7, 8],
+        [9, 10, 11, 12],
+        [13, 14, 15, 16]
+      ];
+      return generateSpiralMatrixTrace(grid);
+    }
+    case 'pascals-triangle-1':
+    case 'pascals-triangle-2':
+    case 'pascals-triangle-3': {
+      const arr = customInput?.array || [1, 4, 6, 4, 1];
+      return generateBubbleSortTrace(arr);
+    }
+    case 'rotate-matrix-90': {
+      const grid = customInput?.grid || [
+        [1, 2, 3],
+        [4, 5, 6],
+        [7, 8, 9]
+      ];
+      return generateRotateMatrixTrace(grid);
+    }
+    case 'set-matrix-zeroes': {
+      const grid = customInput?.grid || [
+        [1, 1, 1],
+        [1, 0, 1],
+        [1, 1, 1]
+      ];
+      return generateSetMatrixZeroesTrace(grid);
+    }
+    case 'three-sum': {
+      const arr = customInput?.array || [-1, 0, 1, 2, -1, -4];
+      return generateThreeSumTrace(arr);
+    }
+    case 'four-sum': {
+      const arr = customInput?.array || [1, 0, -1, 0, -2, 2];
+      const target = customInput?.target !== undefined ? customInput.target : 0;
+      return generateFourSumTrace(arr, target);
     }
     case 'sort-colors': {
       const arr = customInput?.array || [2, 0, 2, 1, 1, 0];
@@ -1551,7 +2298,6 @@ export function getAlgorithmTrace(questionId, customInput = null) {
       return generateFloodFillTrace(grid, 1, 1, 2);
     }
     default: {
-      // Default to bubble sort or linear array trace if array provided
       if (customInput?.array && Array.isArray(customInput.array)) {
         return generateBubbleSortTrace(customInput.array);
       }
@@ -1559,3 +2305,4 @@ export function getAlgorithmTrace(questionId, customInput = null) {
     }
   }
 }
+

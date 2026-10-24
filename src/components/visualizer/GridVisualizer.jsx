@@ -15,10 +15,11 @@ export default function GridVisualizer({ currentStep }) {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center w-full min-h-[280px] p-6 bg-[#0B1120] rounded-xl border border-slate-800 shadow-inner">
+    <div className="surface-card flex flex-col items-center justify-center w-full min-h-[300px] p-4 sm:p-6 border-white/[0.08] shadow-inner relative overflow-x-auto min-w-0">
       <div className="flex flex-col items-center">
-        <span className="text-xs uppercase font-mono tracking-wider text-slate-400 mb-4">
-          2D Pixel Grid (Flood Fill)
+        <span className="text-xs uppercase font-mono tracking-wider text-cyan-400 mb-4 font-bold flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+          {currentStep.gridTitle || '2D Matrix Visualizer'}
         </span>
 
         {/* 2D Matrix */}

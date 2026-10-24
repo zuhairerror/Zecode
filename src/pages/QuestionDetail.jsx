@@ -301,6 +301,19 @@ export default function QuestionDetail({
           >
             {question.difficulty}
           </span>
+          {question.sheetTag && (
+            <span
+              className={`text-[11px] font-mono px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider ${
+                question.sheetTag === 'Basic'
+                  ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+                  : question.sheetTag === 'Pro'
+                  ? 'bg-rose-500/15 text-rose-400 border border-rose-500/30'
+                  : 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
+              }`}
+            >
+              {question.sheetTag}
+            </span>
+          )}
         </div>
 
         {/* Right Header Controls: Solved Toggle & Question Navigation */}

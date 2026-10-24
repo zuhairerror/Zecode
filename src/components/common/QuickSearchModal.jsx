@@ -128,8 +128,21 @@ export default function QuickSearchModal({ isOpen, onClose, onSelectQuestion, se
                       <BookOpen className="w-4 h-4" />
                     </div>
                     <div className="flex flex-col min-w-0">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-bold text-sm truncate font-display">{q.title}</span>
+                        {q.sheetTag && (
+                          <span
+                            className={`text-[9px] font-mono px-1.5 py-0.2 rounded font-bold uppercase tracking-wider ${
+                              q.sheetTag === 'Basic'
+                                ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                                : q.sheetTag === 'Pro'
+                                ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
+                                : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                            }`}
+                          >
+                            {q.sheetTag}
+                          </span>
+                        )}
                         <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-white/[0.06] text-slate-400">
                           {q.topic}
                         </span>

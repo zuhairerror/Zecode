@@ -100,7 +100,7 @@ export default function QuestionLibrary({ onSelectQuestion, setActivePage, solve
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search 26 problems by title, topic, or keyword (e.g. 'Sort Colors', 'Two Sum', 'Binary Search')..."
+            placeholder={`Search ${QUESTIONS_DATA.length} problems by title, topic, or keyword (e.g. 'Majority Element', 'Two Sum', '3 Sum')...`}
             className="w-full bg-black/50 border border-white/[0.1] rounded-xl pl-12 pr-10 py-3 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-cyan-400 font-sans transition-all"
           />
           {searchQuery && (
@@ -246,10 +246,25 @@ export default function QuestionLibrary({ onSelectQuestion, setActivePage, solve
                     </div>
                   </div>
 
-                  {/* Title */}
-                  <h3 className="text-base font-bold text-white group-hover:text-cyan-300 transition-colors mb-2 truncate font-display">
-                    {q.title}
-                  </h3>
+                  {/* Title and Sheet Tag */}
+                  <div className="flex items-center gap-2 mb-2 flex-wrap">
+                    <h3 className="text-base font-bold text-white group-hover:text-cyan-300 transition-colors truncate font-display">
+                      {q.title}
+                    </h3>
+                    {q.sheetTag && (
+                      <span
+                        className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold uppercase tracking-wider shrink-0 ${
+                          q.sheetTag === 'Basic'
+                            ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+                            : q.sheetTag === 'Pro'
+                            ? 'bg-rose-500/15 text-rose-400 border border-rose-500/30'
+                            : 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
+                        }`}
+                      >
+                        {q.sheetTag}
+                      </span>
+                    )}
+                  </div>
 
                   {/* Description preview */}
                   <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed mb-4">
