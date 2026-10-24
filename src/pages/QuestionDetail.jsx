@@ -9,7 +9,9 @@ import {
   Copy,
   Check,
   Sparkles,
-  Play
+  Play,
+  Maximize2,
+  Minimize2
 } from 'lucide-react';
 import ArrayVisualizer from '../components/visualizer/ArrayVisualizer';
 import LinkedListVisualizer from '../components/visualizer/LinkedListVisualizer';
@@ -21,6 +23,7 @@ import StateInspector from '../components/visualizer/StateInspector';
 import StepExplanation from '../components/visualizer/StepExplanation';
 import MonacoEditorPanel from '../components/visualizer/MonacoEditorPanel';
 import ComplexityCard from '../components/visualizer/ComplexityCard';
+import SideCodeViewer from '../components/visualizer/SideCodeViewer';
 import { getAlgorithmTrace } from '../engine/traceEngine';
 
 export default function QuestionDetail({
@@ -37,6 +40,9 @@ export default function QuestionDetail({
   const [codeTabLang, setCodeTabLang] = useState('python');
   const [codeCopied, setCodeCopied] = useState(false);
   const [loadedToast, setLoadedToast] = useState(false);
+  const [showSideCode, setShowSideCode] = useState(true);
+  const [showMonacoEditor, setShowMonacoEditor] = useState(false);
+  const [isStageExpanded, setIsStageExpanded] = useState(false);
 
   // Visualizer Execution State
   const [steps, setSteps] = useState([]);
@@ -107,6 +113,9 @@ export default function QuestionDetail({
   };
 
   const handleTogglePlay = () => {
+    if (!isPlaying) {
+      setShowSideCode(true);
+    }
     if (currentStepIndex >= steps.length - 1) {
       setCurrentStepIndex(0);
       setIsPlaying(true);
@@ -141,6 +150,7 @@ export default function QuestionDetail({
 
   // Execute Code in Backend Sandbox
   const handleRunCode = async () => {
+    setShowSideCode(true);
     setIsExecuting(true);
     setExecutionResult(null);
 
@@ -333,8 +343,12 @@ export default function QuestionDetail({
 
       {/* Main Workspace Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start w-full min-w-0">
-        {/* Left Column (5 cols on lg): Problem Context, Specs, Test Cases */}
-        <div className="lg:col-span-5 flex flex-col gap-4 w-full min-w-0">
+        {/* Left Column: Problem Context, Specs, Test Cases (Collapsible if Stage Expanded) */}
+        <div
+          className={`${
+            isStageExpanded ? 'hidden' : 'lg:col-span-4 xl:col-span-4'
+          } flex flex-col gap-4 w-full min-w-0 transition-all`}
+        >
           {/* Tab Selector: Problem, Code, Complexity, Test Cases */}
           <div className="flex items-center gap-1 p-1 bg-white/[0.03] rounded-xl border border-white/[0.08] w-full">
             <button
@@ -505,35 +519,59 @@ export default function QuestionDetail({
                 </div>
               )}
 
-              {/* Code Display Area with Line Numbers */}
+              {/* Code Display Area with Line Numbers & Real-Time Execution Highlighting */}
               <div className="rounded-xl border border-white/[0.08] bg-[#070B14] overflow-hidden">
                 <div className="flex items-center justify-between px-3.5 py-2 bg-black/40 border-b border-white/[0.06] text-xs font-mono text-slate-400">
                   <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 inline-block"></span>
+                    <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 inline-block animate-pulse"></span>
                     <span className="text-slate-300 font-medium">{question.title} ({codeTabLang.toUpperCase()})</span>
+                    {currentLine && currentLine > 0 && (
+                      <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-400/40 font-semibold">
+                        Executing Line {currentLine}
+                      </span>
+                    )}
                   </div>
                   <span className="text-[11px] text-slate-500">
                     {(question.starterCode[codeTabLang] || '').split('\n').length} lines
                   </span>
                 </div>
 
-                <div className="p-4 overflow-x-auto max-h-[380px] overflow-y-auto font-mono text-xs leading-relaxed text-slate-200">
-                  <pre className="flex gap-4">
-                    {/* Line numbers gutter */}
-                    <span className="select-none text-slate-600 text-right pr-2 border-r border-white/[0.06]">
-                      {(question.starterCode[codeTabLang] || '')
-                        .split('\n')
-                        .map((_, i) => (
-                          <span key={i} className="block leading-relaxed">
-                            {i + 1}
-                          </span>
-                        ))}
-                    </span>
-                    {/* Code lines */}
-                    <code className="text-cyan-100 flex-1 whitespace-pre leading-relaxed">
-                      {question.starterCode[codeTabLang] || '// No code available for this language'}
-                    </code>
-                  </pre>
+                <div className="p-2 overflow-x-auto max-h-[380px] overflow-y-auto font-mono text-xs leading-relaxed text-slate-200 scrollbar-thin select-text">
+                  <div className="flex flex-col min-w-full">
+                    {(question.starterCode[codeTabLang] || '')
+                      .split('\n')
+                      .map((lineText, idx) => {
+                        const lineNum = idx + 1;
+                        const isCurrent = currentLine === lineNum;
+                        return (
+                          <div
+                            key={lineNum}
+                            className={`flex items-center py-0.5 px-2 rounded transition-all duration-150 ${
+                              isCurrent
+                                ? 'bg-cyan-500/25 border-l-4 border-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.25)]'
+                                : 'hover:bg-white/[0.02] border-l-4 border-transparent'
+                            }`}
+                          >
+                            <span
+                              className={`w-8 shrink-0 select-none pr-2 font-mono text-[11px] ${
+                                isCurrent ? 'text-cyan-300 font-bold' : 'text-slate-600'
+                              }`}
+                            >
+                              {lineNum}
+                            </span>
+                            <pre className="flex-1 overflow-x-visible font-mono text-xs">
+                              <code
+                                className={`${
+                                  isCurrent ? 'text-white font-semibold' : 'text-cyan-100'
+                                }`}
+                              >
+                                {lineText || ' '}
+                              </code>
+                            </pre>
+                          </div>
+                        );
+                      })}
+                  </div>
                 </div>
               </div>
 
@@ -644,60 +682,198 @@ export default function QuestionDetail({
           )}
         </div>
 
-        {/* Right Column (7 cols on lg): Visualizer Canvas + Controls + Monaco Editor */}
-        <div className="lg:col-span-7 flex flex-col gap-5 w-full min-w-0">
-          {/* Visualizer Stage Container */}
-          <div className="flex flex-col gap-3.5">
-            {renderVisualizerStage()}
+        {/* Right Column: Visualizer Canvas + Synchronized Code Side-by-Side + Controls + Monaco Sandbox */}
+        <div
+          className={`${
+            isStageExpanded ? 'lg:col-span-12' : 'lg:col-span-8 xl:col-span-8'
+          } flex flex-col gap-5 w-full min-w-0 transition-all`}
+        >
+          {/* Stage Top Toolbar with Code Panel On/Off Toggle */}
+          <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-2.5 rounded-xl bg-[#0A0F1D] border border-white/[0.08]">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse shrink-0" />
+              <span className="text-xs font-mono font-bold text-white uppercase tracking-wider truncate">
+                Algorithm Visualizer & Execution Stage
+              </span>
+              {currentLine && (
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-400/30 shrink-0 font-semibold hidden sm:inline">
+                  Step {currentStepIndex + 1}/{steps.length} • Line {currentLine}
+                </span>
+              )}
+            </div>
 
-            {question.hasVisualizer && steps.length > 0 && (
-              <>
-                {/* Playback Controls Scrubber Bar */}
-                <ControlBar
-                  isPlaying={isPlaying}
-                  onTogglePlay={handleTogglePlay}
-                  currentStepIndex={currentStepIndex}
-                  totalSteps={steps.length}
-                  onNext={handleNextStep}
-                  onPrev={handlePrevStep}
-                  onReset={handleReset}
-                  onJumpStart={() => setCurrentStepIndex(0)}
-                  onJumpEnd={() => setCurrentStepIndex(steps.length - 1)}
-                  onSeek={(idx) => setCurrentStepIndex(idx)}
-                  speed={speed}
-                  onSpeedChange={setSpeed}
-                />
+            <div className="flex items-center gap-2 shrink-0">
+              {/* Play / Run Code Quick Action Button */}
+              <button
+                onClick={() => {
+                  setShowSideCode(true);
+                  if (!isPlaying && steps.length > 0) {
+                    setIsPlaying(true);
+                  } else {
+                    loadVisualizationTrace();
+                    setIsPlaying(true);
+                  }
+                }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-bold bg-cyan-500 hover:bg-cyan-400 text-slate-950 transition-all shadow-sm"
+                title="Play Execution with Real-Time Line Highlighting"
+              >
+                <Play className="w-3.5 h-3.5 fill-current" />
+                <span>{isPlaying ? 'Replay' : 'Run / Play'}</span>
+              </button>
 
-                {/* Step Explanation Banner */}
-                <StepExplanation step={currentStep} />
+              {/* Collapsible Panel On/Off Toggle Button for Code Beside Visualizer */}
+              <button
+                onClick={() => setShowSideCode(!showSideCode)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-semibold transition-all shadow-sm ${
+                  showSideCode
+                    ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-400/40 hover:bg-cyan-500/30'
+                    : 'bg-white/[0.04] text-slate-400 hover:text-white border border-white/[0.08]'
+                }`}
+                title={showSideCode ? 'Close Code Panel' : 'Display Code Beside Visualization'}
+              >
+                <Code2 className="w-3.5 h-3.5 text-cyan-400" />
+                <span>Code Panel: {showSideCode ? 'ON' : 'OFF'}</span>
+              </button>
 
-                {/* Live Variable Inspector */}
-                {currentStep && currentStep.variables && (
-                  <StateInspector variables={currentStep.variables} />
+              {/* Expand / Restore Full Width Stage Button */}
+              <button
+                onClick={() => setIsStageExpanded(!isStageExpanded)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/[0.06] border border-white/[0.08] transition-colors hidden md:flex items-center gap-1 text-xs font-mono"
+                title={isStageExpanded ? 'Restore Sidebar' : 'Expand Visualizer Full Width'}
+              >
+                {isStageExpanded ? (
+                  <>
+                    <Minimize2 className="w-3.5 h-3.5" />
+                    <span className="hidden xl:inline text-[11px]">Sidebar</span>
+                  </>
+                ) : (
+                  <>
+                    <Maximize2 className="w-3.5 h-3.5" />
+                    <span className="hidden xl:inline text-[11px]">Wide Stage</span>
+                  </>
                 )}
-              </>
+              </button>
+            </div>
+          </div>
+
+          {/* SIDE-BY-SIDE VISUALIZATION CANVAS & SYNCHRONIZED CODE VIEWER */}
+          <div className="w-full min-w-0">
+            {showSideCode ? (
+              <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 items-stretch min-h-[380px]">
+                {/* Left Side: Visualizer Canvas (Dutch Flag, Array, Linked List, Tree, etc.) */}
+                <div className="xl:col-span-7 flex flex-col justify-center min-w-0 h-full">
+                  {renderVisualizerStage()}
+                </div>
+
+                {/* Right Side: Synchronized Line-by-Line Code Viewer with Real-Time Highlighting */}
+                <div className="xl:col-span-5 flex flex-col min-w-0 h-full">
+                  <SideCodeViewer
+                    code={question.starterCode[language] || code}
+                    language={language}
+                    onLanguageChange={(lang) => {
+                      setLanguage(lang);
+                      setCode(question.starterCode[lang] || '');
+                    }}
+                    currentLine={currentLine}
+                    currentStep={currentStep}
+                    onClose={() => setShowSideCode(false)}
+                    onLoadToEditor={() => {
+                      setCode(question.starterCode[language] || '');
+                      setShowMonacoEditor(true);
+                    }}
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="w-full flex flex-col justify-center min-w-0 relative">
+                {renderVisualizerStage()}
+                {/* Subtle Prompt to Reopen Code Panel */}
+                <div className="mt-2 flex justify-end">
+                  <button
+                    onClick={() => setShowSideCode(true)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 transition-all shadow-sm"
+                  >
+                    <Code2 className="w-3.5 h-3.5" />
+                    <span>Open Code Beside Visualizer</span>
+                  </button>
+                </div>
+              </div>
             )}
           </div>
 
-          {/* Monaco Code Editor Panel with Run Code Button and Console */}
-          <div className="min-h-[460px]">
-            <MonacoEditorPanel
-              language={language}
-              onLanguageChange={setLanguage}
-              code={code}
-              onCodeChange={setCode}
-              onRunCode={handleRunCode}
-              onVisualize={() => {
-                loadVisualizationTrace();
-                setIsPlaying(true);
-              }}
-              onResetCode={() => setCode(question.starterCode[language] || '')}
-              currentLine={currentLine}
-              isExecuting={isExecuting}
-              executionResult={executionResult}
-              customInput={customInputStr}
-              onCustomInputChange={setCustomInputStr}
-            />
+          {/* Playback Controls Scrubber Bar + Explanation + Inspector */}
+          {question.hasVisualizer && steps.length > 0 && (
+            <div className="flex flex-col gap-3.5">
+              {/* Playback Controls Scrubber Bar */}
+              <ControlBar
+                isPlaying={isPlaying}
+                onTogglePlay={handleTogglePlay}
+                currentStepIndex={currentStepIndex}
+                totalSteps={steps.length}
+                onNext={handleNextStep}
+                onPrev={handlePrevStep}
+                onReset={handleReset}
+                onJumpStart={() => setCurrentStepIndex(0)}
+                onJumpEnd={() => setCurrentStepIndex(steps.length - 1)}
+                onSeek={(idx) => setCurrentStepIndex(idx)}
+                speed={speed}
+                onSpeedChange={setSpeed}
+              />
+
+              {/* Step Explanation Banner */}
+              <StepExplanation step={currentStep} />
+
+              {/* Live Variable Inspector */}
+              {currentStep && currentStep.variables && (
+                <StateInspector variables={currentStep.variables} />
+              )}
+            </div>
+          )}
+
+          {/* Collapsible Monaco Sandbox & Custom Code Runner */}
+          <div className="surface-card p-0 overflow-hidden border border-white/[0.08] rounded-xl bg-[#080C16]">
+            <button
+              onClick={() => setShowMonacoEditor(!showMonacoEditor)}
+              className="w-full flex items-center justify-between px-4 py-3 bg-[#0A0F1D] hover:bg-white/[0.02] border-b border-white/[0.06] transition-colors group text-left"
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="w-2 h-2 rounded-full bg-emerald-400" />
+                <span className="text-xs font-mono font-bold text-white uppercase tracking-wider">
+                  Interactive Monaco Sandbox & Live Compiler
+                </span>
+                <span className="text-[11px] font-mono text-slate-400 hidden sm:inline">
+                  (Write custom code, test inputs, and compile in Python, C++, Java, C)
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-mono text-cyan-400 group-hover:underline">
+                  {showMonacoEditor ? 'Collapse Sandbox ▲' : 'Open Custom Sandbox ▼'}
+                </span>
+              </div>
+            </button>
+
+            {showMonacoEditor && (
+              <div className="p-4">
+                <MonacoEditorPanel
+                  language={language}
+                  onLanguageChange={setLanguage}
+                  code={code}
+                  onCodeChange={setCode}
+                  onRunCode={handleRunCode}
+                  onVisualize={() => {
+                    setShowSideCode(true);
+                    loadVisualizationTrace();
+                    setIsPlaying(true);
+                  }}
+                  onResetCode={() => setCode(question.starterCode[language] || '')}
+                  currentLine={currentLine}
+                  isExecuting={isExecuting}
+                  executionResult={executionResult}
+                  customInput={customInputStr}
+                  onCustomInputChange={setCustomInputStr}
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>
